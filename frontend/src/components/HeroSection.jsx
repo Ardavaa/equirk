@@ -8,6 +8,7 @@ import avatar5 from '../assets/avatar5.png';
 import avatar6 from '../assets/avatar6.png';
 import avatar7 from '../assets/avatar7.png';
 import avatar8 from '../assets/avatar8.png';
+import { useAuth } from '../contexts/AuthContext';
 
 const avatars = [
   { src: avatar1, alt: 'Avatar 1' },
@@ -35,6 +36,18 @@ const avatarPositions = [
 ];
 
 export default function HeroSection() {
+  const { isAuthenticated, login, logout, isLoading } = useAuth();
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      // User is already authenticated, redirect to dashboard or main app
+      console.log('User is authenticated, redirect to dashboard');
+    } else {
+      // User is not authenticated, start login process
+      login();
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-white min-h-screen">
       {/* Elliptical Background Arcs */}
@@ -139,8 +152,24 @@ export default function HeroSection() {
         <p className="mt-4 text-xl text-gray-600">
           Helping people with disabilities find jobs, learn skills, and grow
         </p>
-        <button className="mt-8 px-6 py-3 bg-green-800 text-white rounded-md shadow hover:bg-green-700 transition">
-          Get Started Now
+        <button 
+          onClick={handleGetStarted}
+          disabled={isLoading}
+          className="mt-8 px-6 py-3 bg-green-800 text-white rounded-md shadow hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? (
+            <span className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Loading...
+            </span>
+          ) : isAuthenticated ? (
+            'Go to Dashboard'
+          ) : (
+            'Get Started Now'
+          )}
         </button>
       </div>
     </section>
