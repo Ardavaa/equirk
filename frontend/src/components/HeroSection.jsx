@@ -23,15 +23,15 @@ const avatars = [
 // Avatar positioning data for elliptical arcs
 const avatarPositions = [
   // Left side
-  { x: 25, y: 57, delay: 0 },    
-  { x: 15, y: 55, delay: 3 },     
-  { x: 20, y: 40, delay: 3.5 },   
-  { x: 20, y: 70, delay: 0.5 },   
+  { x: 22, y: 57, delay: 0 },    
+  { x: 13, y: 55, delay: 3 },     
+  { x: 18, y: 40, delay: 3.5 },   
+  { x: 17, y: 70, delay: 0.5 },   
   // Right side (mirrored from left)
-  { x: 75, y: 57, delay: 1 },
-  { x: 85, y: 55, delay: 1.5 },  
-  { x: 80, y: 40, delay: 2 },    
-  { x: 80, y: 70, delay: 2.5 },  
+  { x: 78, y: 57, delay: 1 },
+  { x: 87, y: 55, delay: 1.5 },  
+  { x: 82, y: 40, delay: 2 },    
+  { x: 83, y: 70, delay: 2.5 },  
 ];
 
 export default function HeroSection() {
