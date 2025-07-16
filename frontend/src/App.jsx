@@ -9,12 +9,15 @@ import ContactSection from './components/ContactSection';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
 import CareerSection from './components/CareerSection';
+import { AuthProvider } from './contexts/AuthContext';
+import AuthStatus from './components/AuthStatus';
 
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <div className='bg-white'>
+        <AuthStatus />
         <Navbar />
         <div className='mt-8'>
           <HeroSection />
@@ -39,7 +42,7 @@ function App() {
         </div>
         <Footer/>
       </div>
-    </>
+    </AuthProvider>
   )
 }
 
