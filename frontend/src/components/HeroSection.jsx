@@ -21,17 +21,19 @@ const avatars = [
 ];
 
 // Avatar positioning data for elliptical arcs
+// The `x` and `y` values represent percentages of the container's width and height, respectively.
+// Positions are arranged along elliptical arcs for visual symmetry, with the right side mirroring the left.
 const avatarPositions = [
   // Left side
-  { x: 22, y: 57, delay: 0 },    
-  { x: 13, y: 55, delay: 3 },     
-  { x: 18, y: 40, delay: 3.5 },   
-  { x: 17, y: 70, delay: 0.5 },   
+  { x: 22, y: 57, delay: 0 },    // Positioned near the middle-left of the ellipse
+  { x: 13, y: 55, delay: 3 },    // Slightly lower and further left
+  { x: 18, y: 40, delay: 3.5 },  // Higher up on the left side
+  { x: 17, y: 70, delay: 0.5 },  // Lower down on the left side
   // Right side (mirrored from left)
-  { x: 78, y: 57, delay: 1 },
-  { x: 87, y: 55, delay: 1.5 },  
-  { x: 82, y: 40, delay: 2 },    
-  { x: 83, y: 70, delay: 2.5 },  
+  { x: 78, y: 57, delay: 1 },    // Positioned near the middle-right of the ellipse
+  { x: 87, y: 55, delay: 1.5 },  // Slightly lower and further right
+  { x: 82, y: 40, delay: 2 },    // Higher up on the right side
+  { x: 83, y: 70, delay: 2.5 },  // Lower down on the right side
 ];
 
 export default function HeroSection() {
