@@ -31,3 +31,23 @@ html, body {
 .animate-spin-slow {
   animation: spin-slow 20s linear infinite;
 }
+
+/* Floating animation for avatars */
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+  }
+}
+
+.floating-avatar {
+  animation: floating 3s ease-in-out infinite;
+}
+
+.floating-avatar:hover {
+  animation-play-state: paused;
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
