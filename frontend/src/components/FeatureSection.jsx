@@ -28,10 +28,10 @@ const FeaturesSection = () => {
     <div className="p-8 font-sans grid md:grid-cols-2 gap-8 items-start mx-10">
       {/* Left Side */}
       <div>
-        <button className="border border-green-600 text-green-600 px-4 py-1 rounded-lg mb-4">
+        <button className="border px-4 py-1 rounded-lg mb-4" style={{borderColor: '#2d6a4f', color: '#2d6a4f'}}>
           Features
         </button>
-        <h2 className="text-black text-8xl md:text-3xl font-medium max-w-[88%]">
+        <h2 className="text-custom-dark text-8xl md:text-3xl font-medium max-w-[88%] leading-relaxed">
           Everything you need to plan your career with confidence. From job matching to skill-building, all in one place.
         </h2>
       </div>
@@ -40,9 +40,9 @@ const FeaturesSection = () => {
       <div className="space-y-6 pt-10">
         {features.map((item, index) => (
           <div key={index} className="flex items-start gap-4 border-b pb-4">
-            <p className="text-6xl font-semibold text-gray-900">{item.number}</p>
+                          <p className="text-6xl font-semibold text-custom-dark">{item.number}</p>
             <div>
-              <h3 className="text-black font-semibold text-lg">{item.title}</h3>
+              <h3 className="text-custom-dark font-semibold text-lg">{item.title}</h3>
               <p className="pt-2 text-sm text-gray-600">{item.desc}</p>
               <hr className="mt-4 my-[-20px] border-gray-300" />
             </div>

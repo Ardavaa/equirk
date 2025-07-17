@@ -42,7 +42,7 @@ const CareerSection = () => {
       </button>
 
       {/* Title */}
-      <h2 className="text-black text-8xl md:text-3xl font-medium mb-8 max-w-xl mt-2 pb-8">
+                  <h2 className="text-custom-dark text-8xl md:text-3xl font-medium mb-8 max-w-xl mt-2 pb-8">
         Find real job openings from companies that value accessibility and inclusion.
       </h2>
 
@@ -50,7 +50,7 @@ const CareerSection = () => {
       <div className="relative">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {jobs.map((job) => (
-            <div key={job.id} className="text-black border rounded-md p-6 text-sm bg-white">
+                            <div key={job.id} className="text-custom-dark border rounded-md p-6 text-sm bg-white">
               <p className="text-gray-500 mb-1 p-1">📍 {job.location}</p>
               <h3 className="font-semibold text-xl p-1 text-base">{job.title}</h3>
               <p className="text-gray-600 p-1 mt-1">

@@ -7,17 +7,19 @@ const AboutSection = () => {
   return (
     <div className="p-8 font-sans mx-10">
       {/* About Button */}
-      <button className="border border-green-600 text-green-600 px-4 py-1 rounded-lg mb-4">
+      <button className="border px-4 py-1 rounded-lg mb-4" style={{borderColor: '#2d6a4f', color: '#2d6a4f'}}>
         About
       </button>
 
       {/* Heading */}
-      <h1 className="text-black text-2xl md:text-3xl font-medium mb-6 max-w-[82%]">
+                  <h1 className="text-custom-dark text-2xl md:text-3xl font-medium mb-6 max-w-[82%] leading-relaxed">
         Equirk helps people with disabilities{' '}
         <span className="bg-gradient-to-r from-[#82A696] to-[#2D6A4F] bg-clip-text text-transparent font-semibold">
           explore career options
         </span>{' '}
-        that fit their needs, build the right skills, and grow at their own pace. We’re here to make inclusive work more accessible, one step at a time.
+        that fit <br>
+        </br>their needs, build the right skills, and grow at their own pace. <br>
+        </br> We’re here to make inclusive work more accessible, one step at a time.
       </h1>
 
       {/* Cards */}
