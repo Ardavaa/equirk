@@ -1,12 +1,8 @@
-![Banner GithHub]()
 
 # `equirk`
+![Banner GithHub](doc/GitHub%20Banner.png)
 
 Equirk is a web-based platform that empowers people with disabilities to discover inclusive career opportunities and personalized skill roadmaps. By leveraging cutting-edge Web3 technology, equirk ensures a more accessible, transparent, and empowering job-matching and learning experience for users with diverse abilities.
-
-<!-- ## 📺 Equirk Demo
-
-Demo Video: [Youtube](https://youtu.be/ePsqfiSq13c) -->
 
 ---
 
