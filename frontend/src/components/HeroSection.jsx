@@ -9,6 +9,7 @@ import avatar6 from '../assets/avatar6.png';
 import avatar7 from '../assets/avatar7.png';
 import avatar8 from '../assets/avatar8.png';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const avatars = [
   { src: avatar1, alt: 'Avatar 1' },
@@ -39,11 +40,12 @@ const avatarPositions = [
 
 export default function HeroSection() {
   const { isAuthenticated, login, logout, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
       // User is already authenticated, redirect to dashboard or main app
-      console.log('User is authenticated, redirect to dashboard');
+      navigate('/dashboard');
     } else {
       // User is not authenticated, start login process
       login();
