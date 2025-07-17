@@ -13,7 +13,11 @@ const AboutSection = () => {
 
       {/* Heading */}
       <h1 className="text-black text-2xl md:text-3xl font-medium mb-6 max-w-[82%]">
-        Equirk helps people with disabilities <span className="text-green-600 font-semibold">explore career options</span> that fit their needs, build the right skills, and grow at their own pace. We’re here to make inclusive work more accessible, one step at a time.
+        Equirk helps people with disabilities{' '}
+        <span className="bg-gradient-to-r from-[#82A696] to-[#2D6A4F] bg-clip-text text-transparent font-semibold">
+          explore career options
+        </span>{' '}
+        that fit their needs, build the right skills, and grow at their own pace. We’re here to make inclusive work more accessible, one step at a time.
       </h1>
 
       {/* Cards */}
