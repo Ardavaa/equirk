@@ -67,3 +67,8 @@ html, body {
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* Custom text color for #252525 */
+.text-custom-dark {
+  color: #252525;
+}
