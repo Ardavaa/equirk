@@ -98,7 +98,7 @@ function Dashboard() {
             </div>
             <div className="text-left">
               <div className="text-xs font-medium text-gray-400">STEP 1</div>
-              <div className="text-sm font-medium text-gray-900">Disability Type</div>
+                              <div className="text-sm font-medium text-custom-dark">Disability Type</div>
             </div>
           </div>
 
@@ -109,7 +109,7 @@ function Dashboard() {
             </div>
             <div className="text-left">
               <div className="text-xs font-medium text-gray-400">STEP 2</div>
-              <div className="text-sm font-medium text-gray-900">Job Interests</div>
+                              <div className="text-sm font-medium text-custom-dark">Job Interests</div>
             </div>
           </div>
 
@@ -120,7 +120,7 @@ function Dashboard() {
             </div>
             <div className="text-left">
               <div className="text-xs font-medium text-gray-400">STEP 3</div>
-              <div className="text-sm font-medium text-gray-900">Skills You Have</div>
+                              <div className="text-sm font-medium text-custom-dark">Skills You Have</div>
             </div>
           </div>
         </div>
@@ -132,7 +132,7 @@ function Dashboard() {
           <div className="p-10">
             {/* Header */}
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-medium text-black mb-4">
+              <h2 className="text-3xl font-medium text-custom-dark mb-4">
                 What's your disability type?
               </h2>
               <p className="text-base text-gray-500">
@@ -144,7 +144,7 @@ function Dashboard() {
             <div className="space-y-5">
               {/* Disability Input */}
               <div>
-                <label className="block text-base font-medium text-black mb-3">
+                <label className="block text-base font-medium text-custom-dark mb-3">
                   Disability
                 </label>
                 <div className="border border-gray-300 rounded-lg p-3 h-[52px] flex items-center">
@@ -160,7 +160,7 @@ function Dashboard() {
 
               {/* Common Disability Types */}
               <div>
-                <label className="block text-base font-medium text-black mb-3">
+                <label className="block text-base font-medium text-custom-dark mb-3">
                   Common Disability Types
                 </label>
                 <div className="space-y-2">
