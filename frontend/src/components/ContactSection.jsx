@@ -7,10 +7,10 @@ const ContactSection = () => {
         Contact
       </button>
 
-      <div className="text-black grid md:grid-cols-2 gap-8">
+              <div className="text-custom-dark grid md:grid-cols-2 gap-8">
         {/* Left Side */}
         <div>
-          <h2 className="text-black text-3xl font-semibold mb-6 max-w-lg">
+                      <h2 className="text-custom-dark text-3xl font-semibold mb-6 max-w-lg">
             If you have any questions or you’d like to find out more about our services, please get in touch.
           </h2>
 
@@ -56,7 +56,7 @@ const ContactSection = () => {
               className="w-full p-2 border border-gray-300 rounded bg-white"
             ></textarea>
           </div>
-          <button type="submit" className="w-full bg-[#2D6A4F] text-white py-3 rounded-lg hover:bg-green-800">
+          <button type="submit" className="w-full bg-gradient-to-b from-[#2D6A4F] to-[#22503B] text-white py-3 rounded-lg hover:from-[#285f47] hover:to-[#1e4634] transition">
             Send Message
           </button>
         </form>

@@ -43,7 +43,7 @@ export default function Navbar() {
         <button
           onClick={handleAuthClick}
           disabled={isLoading}
-          className="bg-emerald-800 text-white px-5 py-2 rounded-md shadow hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-gradient-to-b from-[#2D6A4F] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <span className="flex items-center">
