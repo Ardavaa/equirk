@@ -150,7 +150,7 @@ export default function HeroSection() {
 
       {/* Text Content */}
       <div className="relative z-20 text-center mt-30 py-32">
-        <h1 className="text-5xl sm:text-6xl font-medium text-gray-900 px-4">
+                      <h1 className="text-5xl sm:text-6xl font-medium text-custom-dark px-4">
           Smart Career Tools for People <br/> with Disabilities
         </h1>
         <p className="mt-4 text-xl text-gray-600">
@@ -159,7 +159,7 @@ export default function HeroSection() {
         <button 
           onClick={handleGetStarted}
           disabled={isLoading}
-          className="mt-8 px-6 py-3 bg-green-800 text-white rounded-md shadow hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-8 px-6 py-3 bg-gradient-to-b from-[#2D6A4F] to-[#22503B] text-white rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <span className="flex items-center">
