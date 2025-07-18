@@ -214,7 +214,7 @@ const ContactSection = () => {
                 animate={isInView ? "visible" : "hidden"}
               >
                 <p className="font-medium text-2xl">{detail.title}</p>
-                <p className='textl-xl text-gray-400 font-medium'>{detail.info}</p>
+                <p className='text-xl text-gray-400 font-medium'>{detail.info}</p>
               </motion.div>
             ))}
           </motion.div>
