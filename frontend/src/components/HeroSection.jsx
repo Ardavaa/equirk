@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import Floating1 from '../assets/Floating1.png';
 import Floating2 from '../assets/Floating2.png';
 import avatar1 from '../assets/avatar1.png';
@@ -10,6 +11,7 @@ import avatar7 from '../assets/avatar7.png';
 import avatar8 from '../assets/avatar8.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useReducedMotion, getAccessibleVariants, getAccessibleTransition } from '../hooks/useReducedMotion';
 
 const avatars = [
   { src: avatar1, alt: 'Avatar 1' },
@@ -23,37 +25,158 @@ const avatars = [
 ];
 
 // Avatar positioning data for elliptical arcs
-// The `x` and `y` values represent percentages of the container's width and height, respectively.
-// Positions are arranged along elliptical arcs for visual symmetry, with the right side mirroring the left.
 const avatarPositions = [
   // Left side
-  { x: 22, y: 57, delay: 0 },    // Positioned near the middle-left of the ellipse
-  { x: 13, y: 55, delay: 3 },    // Slightly lower and further left
-  { x: 18, y: 40, delay: 3.5 },  // Higher up on the left side
-  { x: 17, y: 70, delay: 0.5 },  // Lower down on the left side
-  // Right side (mirrored from left)
-  { x: 78, y: 57, delay: 1 },    // Positioned near the middle-right of the ellipse
-  { x: 87, y: 55, delay: 1.5 },  // Slightly lower and further right
-  { x: 82, y: 40, delay: 2 },    // Higher up on the right side
-  { x: 83, y: 70, delay: 2.5 },  // Lower down on the right side
+  { x: 22, y: 57, delay: 0, direction: 'left' },
+  { x: 13, y: 55, delay: 0.2, direction: 'left' },
+  { x: 18, y: 40, delay: 0.4, direction: 'left' },
+  { x: 17, y: 70, delay: 0.6, direction: 'left' },
+  // Right side
+  { x: 78, y: 57, delay: 0.8, direction: 'right' },
+  { x: 87, y: 55, delay: 1.0, direction: 'right' },
+  { x: 82, y: 40, delay: 1.2, direction: 'right' },
+  { x: 83, y: 70, delay: 1.4, direction: 'right' },
 ];
+
+// Animation variants for different elements
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const avatarVariants = {
+  hidden: (direction) => ({
+    opacity: 0,
+    x: direction === 'left' ? -60 : 60,
+    y: 20,
+    scale: 0.8,
+  }),
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15,
+      duration: 0.8,
+    }
+  }
+};
+
+const headlineVariants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    scale: 0.95
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+      duration: 0.6,
+      delay: 0.5
+    }
+  }
+};
+
+const subtitleVariants = {
+  hidden: {
+    opacity: 0,
+    y: 20
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      delay: 0.8
+    }
+  }
+};
+
+const buttonVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+    y: 10
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 15,
+      delay: 1.2
+    }
+  },
+  hover: {
+    scale: 1.05,
+    transition: {
+      duration: 0.2
+    }
+  },
+  tap: {
+    scale: 0.95
+  }
+};
+
+const floatingImageVariants = {
+  hidden: (direction) => ({
+    opacity: 0,
+    x: direction === 'left' ? -100 : 100,
+    y: -20,
+    scale: 0.9
+  }),
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 80,
+      damping: 20,
+      duration: 1,
+      delay: 0.3
+    }
+  }
+};
 
 export default function HeroSection() {
   const { isAuthenticated, login, logout, isLoading } = useAuth();
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      // User is already authenticated, redirect to dashboard or main app
       navigate('/dashboard');
     } else {
-      // User is not authenticated, start login process
       login();
     }
   };
 
   return (
-    <section className="relative overflow-hidden bg-white min-h-screen">
+    <motion.section 
+      className="relative overflow-hidden bg-white min-h-[calc(100vh-6rem)]"
+      initial="hidden"
+      animate="visible"
+      variants={getAccessibleVariants(prefersReducedMotion, containerVariants)}
+    >
       {/* Elliptical Background Arcs */}
       <div className="absolute inset-0 flex justify-center items-center">
         <svg className="w-full h-full max-w-6xl" viewBox="0 0 800 600">
@@ -112,14 +235,21 @@ export default function HeroSection() {
         {avatars.map((avatar, index) => {
           const position = avatarPositions[index];
           return (
-            <div
+            <motion.div
               key={index}
               className="absolute w-16 h-16 floating-avatar"
               style={{
                 left: `${position.x}%`,
                 top: `${position.y}%`,
-                animationDelay: `${position.delay}s`,
               }}
+              custom={position.direction}
+              variants={getAccessibleVariants(prefersReducedMotion, avatarVariants)}
+              initial="hidden"
+              animate="visible"
+              transition={getAccessibleTransition(prefersReducedMotion, {
+                ...avatarVariants.visible.transition,
+                delay: prefersReducedMotion ? 0 : position.delay + 0.5
+              })}
             >
               {/* Green outer circle */}
               <div className="w-full h-full rounded-full border-2 border-[#2D6A4F] p-1 bg-white">
@@ -129,37 +259,62 @@ export default function HeroSection() {
                   className="w-full h-full rounded-full border border-white shadow-lg object-cover"
                 />
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Floating Images */}
       <div className='w-full flex justify-center max-w-none'>
-        <img
-        src={Floating1}
-        alt="Roadmap"
-        className="absolute top-0 left-0 w-[400px] h-auto transform translate-x-20 -translate-y-10 drop-shadow-lg z-10"
-      />
-      <img
-        src={Floating2}
-        alt="Job Card"
-        className="absolute top-0 right-0 w-[380px] h-auto transform -translate-x-20 -translate-y-10 drop-shadow-lg z-10"
-      />
+        <motion.img
+          src={Floating1}
+          alt="Roadmap"
+          className="absolute top-0 left-0 w-[400px] h-auto transform translate-x-20 -translate-y-10 drop-shadow-lg z-10"
+          custom="left"
+          variants={getAccessibleVariants(prefersReducedMotion, floatingImageVariants)}
+          initial="hidden"
+          animate="visible"
+        />
+        <motion.img
+          src={Floating2}
+          alt="Job Card"
+          className="absolute top-0 right-0 w-[380px] h-auto transform -translate-x-20 -translate-y-10 drop-shadow-lg z-10"
+          custom="right"
+          variants={getAccessibleVariants(prefersReducedMotion, floatingImageVariants)}
+          initial="hidden"
+          animate="visible"
+        />
       </div>
 
       {/* Text Content */}
       <div className="relative z-20 text-center mt-30 py-32">
-                      <h1 className="text-5xl sm:text-6xl font-medium text-custom-dark px-4">
+        <motion.h1 
+          className="text-5xl sm:text-6xl font-medium text-custom-dark px-4"
+          variants={getAccessibleVariants(prefersReducedMotion, headlineVariants)}
+          initial="hidden"
+          animate="visible"
+        >
           Smart Career Tools for People <br/> with Disabilities
-        </h1>
-        <p className="mt-4 text-xl text-gray-600">
+        </motion.h1>
+        
+        <motion.p 
+          className="mt-4 text-xl text-gray-600"
+          variants={getAccessibleVariants(prefersReducedMotion, subtitleVariants)}
+          initial="hidden"
+          animate="visible"
+        >
           Helping people with disabilities find jobs, learn skills, and grow
-        </p>
-        <button 
+        </motion.p>
+        
+        <motion.button 
           onClick={handleGetStarted}
           disabled={isLoading}
           className="mt-8 px-6 py-3 bg-gradient-to-b from-[#2D6A4F] to-[#22503B] text-white rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          variants={getAccessibleVariants(prefersReducedMotion, buttonVariants)}
+          initial="hidden"
+          animate="visible"
+          whileHover={prefersReducedMotion ? {} : "hover"}
+          whileTap={prefersReducedMotion ? {} : "tap"}
         >
           {isLoading ? (
             <span className="flex items-center">
@@ -174,8 +329,8 @@ export default function HeroSection() {
           ) : (
             'Get Started Now'
           )}
-        </button>
+        </motion.button>
       </div>
-    </section>
+    </motion.section>
   );
 }

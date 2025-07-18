@@ -19,22 +19,23 @@ function MainLanding() {
     <>
       <AuthStatus />
       <Navbar />
-      <div className='mt-8'>
+      {/* Add padding-top to account for fixed navbar */}
+      <div id="hero" className='pt-24'>
         <HeroSection />
       </div>
       {/* <div className='my-28'>
         <OrbitAvatars />
       </div> */}
-      <div className='mt-32'>
+      <div id="about" className='mt-32'>
         <AboutSection />
       </div>
-      <div className='mt-48'>
+      <div id="features" className='mt-48'>
         <FeatureSection/>
       </div>
-      <div className='mt-32'>
+      <div id="career" className='mt-32'>
         <CareerSection/>
       </div>
-      <div className='mt-48'>
+      <div id="contact" className='mt-48'>
         <ContactSection />
       </div>
       <div className='mt-24 mb-8'>

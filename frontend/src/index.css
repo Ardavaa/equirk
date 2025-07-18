@@ -4,6 +4,18 @@ html, body {
   @apply h-full w-full bg-white m-0 p-0;
 }
 
+/* Smooth scrolling behavior (respects reduced motion) */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ensure smooth scrolling respects reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -71,4 +83,79 @@ html, body {
 /* Custom text color for #252525 */
 .text-custom-dark {
   color: #252525;
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations and transitions for users who prefer reduced motion */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable floating animations specifically */
+  .floating-avatar {
+    animation: none !important;
+  }
+  
+  /* Disable spin animations */
+  .animate-spin-slow {
+    animation: none !important;
+  }
+  
+  /* Disable fade-in animations */
+  .animate-fade-in {
+    animation: none !important;
+  }
+  
+  /* Ensure elements are still visible without animations */
+  .animate-fade-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+  
+  /* Disable any transform animations */
+  .floating-avatar:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Enhanced focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid #2D6A4F;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Ensure sufficient contrast for focus states */
+.focus-visible\:ring-2:focus-visible {
+  --tw-ring-color: #2D6A4F;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .text-gray-600 {
+    color: #000000 !important;
+  }
+  
+  .text-gray-500 {
+    color: #333333 !important;
+  }
+  
+  .border-gray-300 {
+    border-color: #000000 !important;
+  }
+  
+  .bg-gray-50 {
+    background-color: #ffffff !important;
+    border: 1px solid #000000 !important;
+  }
 }
