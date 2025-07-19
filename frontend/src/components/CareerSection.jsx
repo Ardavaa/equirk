@@ -67,7 +67,7 @@ const CareerSection = () => {
       {/* Button */}
       <div className="text-gray-800 text-center mt-4">
         <button className="border border-gray-400 px-4 py-2 rounded-lg shadow-gray-300 shadow-lg hover:bg-gray-100 transition">
-          See More Jobs
+          Find Jobs that Fits you
         </button>
       </div>
     </div>
