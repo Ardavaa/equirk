@@ -203,7 +203,7 @@ const ContactSection = () => {
           >
             <motion.div>
               <p className="font-medium text-2xl">Contact Details</p>
-              <p className='textl-xl text-gray-400 font-medium'>📞 1234–5678–9000</p>
+              <p className='text-xl text-gray-400 font-medium'>📞 1234–5678–9000</p>
             </motion.div>
             {contactDetails.map((detail, index) => (
               <motion.div 
@@ -214,7 +214,7 @@ const ContactSection = () => {
                 animate={isInView ? "visible" : "hidden"}
               >
                 <p className="font-medium text-2xl">{detail.title}</p>
-                <p className='textl-xl text-gray-400 font-medium'>{detail.info}</p>
+                <p className='text-xl text-gray-400 font-medium'>{detail.info}</p>
               </motion.div>
             ))}
           </motion.div>
