@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Logo from '../assets/Logo.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ResumeUpload from './ResumeUpload';
 
 function Dashboard() {
   const { isAuthenticated, principal, logout, isLoading } = useAuth();
@@ -9,6 +10,7 @@ function Dashboard() {
   const [selectedDisabilities, setSelectedDisabilities] = useState([]);
   const [selectedJobs, setSelectedJobs] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]); // New state for skills
+  const [selectedResume, setSelectedResume] = useState(null); // New state for resume
   const navigate = useNavigate();
 
   const disabilityTypes = [
@@ -68,8 +70,20 @@ function Dashboard() {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      navigate('/skills');
+      // Final completion - show completion message
+      console.log('Onboarding completed!', {
+        disabilities: selectedDisabilities,
+        jobs: selectedJobs,
+        skills: selectedSkills,
+        resume: selectedResume
+      });
+      alert('Profile setup completed successfully!');
     }
+  };
+
+  const handleResumeSelect = (file) => {
+    setSelectedResume(file);
+    console.log('Resume selected:', file);
   };
 
   const handleBack = () => {
@@ -145,11 +159,11 @@ function Dashboard() {
 
           <div className="flex flex-col bg-white px-4">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center relative z-10 mb-2 ${step >= 3 ? 'bg-green-700' : 'bg-white border border-gray-300'}`}>
-              {step === 4 ? <span className="text-white">✔</span> : <div className="w-3 h-3 rounded-full" style={{ backgroundColor: step >= 3 ? '#eaf1ee' : 'transparent' }}></div>}
+              {step > 3 ? <span className="text-white">✔</span> : <div className="w-3 h-3 rounded-full" style={{ backgroundColor: step >= 3 ? '#eaf1ee' : 'transparent' }}></div>}
             </div>
             <div className="text-left">
               <div className="text-xs font-medium text-gray-400">STEP 3</div>
-              <div className="text-sm font-medium text-custom-dark">Skills You Have</div>
+              <div className="text-sm font-medium text-custom-dark">Skills & Resume</div>
             </div>
           </div>
         </div>
@@ -275,58 +289,79 @@ function Dashboard() {
               <>
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-medium text-custom-dark mb-4">What skills do you have?</h2>
-                  <p className="text-base text-gray-500">Select the skills that apply to you.</p>
+                  <p className="text-base text-gray-500">Select your skills or upload your resume - we'll extract skills from it.</p>
                 </div>
-                <div className="space-y-5">
-                  <div className="border border-gray-300 rounded-lg p-3 min-h-[52px] flex items-center flex-wrap gap-2">
-                    {selectedSkills.map((skill, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center bg-emerald-700 text-white text-sm px-3 py-1 rounded-full"
-                      >
-                        <span>{skill}</span>
-                        <button
-                          className="ml-2 text-white hover:text-gray-200"
-                          onClick={() =>
-                            setSelectedSkills(selectedSkills.filter((item) => item !== skill))
-                          }
+                <div className="space-y-8">
+                  {/* Manual Skills Selection Section */}
+                  <div className="space-y-5">
+                    <div className="border border-gray-300 rounded-lg p-3 min-h-[52px] flex items-center flex-wrap gap-2">
+                      {selectedSkills.map((skill, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center bg-emerald-700 text-white text-sm px-3 py-1 rounded-full"
                         >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div>
-                    <label className="block text-base font-medium text-custom-dark mb-3">Skill Options</label>
-                    <div className="space-y-2">
-                      {[0, 1].map(i => (
-                        <div className="flex gap-2" key={i}>
-                          {skillOptions.slice(i * 3, i * 3 + 3).map((skill, index) => (
-                            <button
-                              key={index}
-                              onClick={() => handleSkillSelect(skill)}
-                              disabled={selectedSkills.includes(skill)}
-                              className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${
-                                selectedSkills.includes(skill)
-                                  ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-                                  : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
-                              }`}
-                            >
-                              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
-                              </svg>
-                              <span className="text-sm">{skill}</span>
-                            </button>
-                          ))}
+                          <span>{skill}</span>
+                          <button
+                            className="ml-2 text-white hover:text-gray-200"
+                            onClick={() =>
+                              setSelectedSkills(selectedSkills.filter((item) => item !== skill))
+                            }
+                          >
+                            ×
+                          </button>
                         </div>
                       ))}
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-custom-dark mb-3">Skill Options</label>
+                      <div className="space-y-2">
+                        {[0, 1].map(i => (
+                          <div className="flex gap-2" key={i}>
+                            {skillOptions.slice(i * 3, i * 3 + 3).map((skill, index) => (
+                              <button
+                                key={index}
+                                onClick={() => handleSkillSelect(skill)}
+                                disabled={selectedSkills.includes(skill)}
+                                className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${
+                                  selectedSkills.includes(skill)
+                                    ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                                    : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
+                                }`}
+                              >
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                  <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
+                                </svg>
+                                <span className="text-sm">{skill}</span>
+                              </button>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* OR Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">OR</span>
+                    </div>
+                  </div>
+
+                  {/* Resume Upload Section */}
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-base font-medium text-custom-dark mb-3">Upload Resume/CV</label>
+                      <p className="text-sm text-gray-500 mb-4">Upload your resume and we'll automatically extract your skills.</p>
+                      <ResumeUpload onFileSelect={handleResumeSelect} />
                     </div>
                   </div>
                 </div>
               </>
             )}
-
 
             <div className="flex justify-between mt-6">
               {step > 1 && (
@@ -341,12 +376,14 @@ function Dashboard() {
                 onClick={handleNext}
                 className="bg-emerald-800 text-white px-5 py-2 rounded-md shadow hover:bg-emerald-700 transition"
               >
-                {step === 3 ? 'Finish' : 'Next'}
+                {step === 3 ? 'Complete Setup' : 'Next'}
               </button>
             </div>
           </div>
         </div>
       </div>
+
+
 
       <div className="border-t border-gray-300 mt-16 px-20 py-6">
         <div className="max-w-[1280px] mx-auto flex justify-between items-center">
