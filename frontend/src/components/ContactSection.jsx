@@ -201,10 +201,6 @@ const ContactSection = () => {
             className="space-y-4 text-sm mt-36"
             variants={contactDetailsVariants}
           >
-            <motion.div>
-              <p className="font-medium text-2xl">Contact Details</p>
-              <p className='textl-xl text-gray-400 font-medium'>📞 1234–5678–9000</p>
-            </motion.div>
             {contactDetails.map((detail, index) => (
               <motion.div 
                 key={index}
