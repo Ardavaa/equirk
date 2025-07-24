@@ -2,20 +2,19 @@ import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
-const ResumeUpload = ({ onFileSelect, className = '' }) => {
+const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
+  const [extractedText, setExtractedText] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
   const fileInputRef = useRef(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Accepted file types for resumes/CVs
+  // Only accept PDF files
   const acceptedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain'
+    'application/pdf'
   ];
 
   const maxFileSize = 10 * 1024 * 1024; // 10MB
@@ -39,7 +38,7 @@ const ResumeUpload = ({ onFileSelect, className = '' }) => {
 
   const validateFile = (file) => {
     if (!acceptedTypes.includes(file.type)) {
-      setError('Please upload a PDF, DOC, DOCX, or TXT file');
+      setError('Please upload a PDF file only');
       return false;
     }
 
@@ -51,24 +50,66 @@ const ResumeUpload = ({ onFileSelect, className = '' }) => {
     return true;
   };
 
-  const processFile = (file) => {
+  const extractTextFromBackend = async (file) => {
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    const response = await fetch('http://localhost:3001/api/extract-pdf-text', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to extract text from PDF');
+    }
+
+    const result = await response.json();
+    return result.text;
+  };
+
+  const processFile = async (file) => {
     if (!validateFile(file)) return;
 
     setError('');
     setSelectedFile(file);
-    
-    // Show progress for file processing
+    setIsExtracting(true);
     setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          if (onFileSelect) onFileSelect(file);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 150); // Slightly slower to account for potential PDF processing
+    
+    try {
+      // Show progress for file processing
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 15;
+        });
+      }, 200);
+
+      // Extract text from PDF using backend API
+      const text = await extractTextFromBackend(file);
+      
+      // Complete progress
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      setExtractedText(text);
+      setIsExtracting(false);
+      
+      // Log the extracted text (as requested)
+      console.log('EXTRACTED TEXT:', text);
+      
+      // Call callbacks
+      if (onFileSelect) onFileSelect(file);
+      if (onTextExtracted) onTextExtracted(text);
+      
+    } catch (error) {
+      console.error('PDF processing error:', error);
+      setError('Failed to extract text from PDF. Please try again.');
+      setIsExtracting(false);
+      setUploadProgress(0);
+    }
   };
 
   const handleDrop = (e) => {
@@ -155,13 +196,13 @@ const ResumeUpload = ({ onFileSelect, className = '' }) => {
           onClick={handleBrowseFiles}
         >
           {/* Hidden file input */}
-                          <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={handleFileSelect}
-                />
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept=".pdf"
+            onChange={handleFileSelect}
+          />
 
           {/* Upload Icon */}
           <motion.div
@@ -182,18 +223,18 @@ const ResumeUpload = ({ onFileSelect, className = '' }) => {
               </span>
             </p>
             
-                              <div className="flex items-center gap-6 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      {getFileIcon()}
-                      <span>PDF (recommended), TXT</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10M7 4v16a1 1 0 001 1h8a1 1 0 001 1V4M7 4H5a1 1 0 00-1 1v16a1 1 0 001 1h2" />
-                      </svg>
-                      <span>Max 10MB</span>
-                    </div>
-                  </div>
+            <div className="flex items-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-1">
+                {getFileIcon()}
+                <span>PDF files only</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10M7 4v16a1 1 0 001 1h8a1 1 0 001 1V4M7 4H5a1 1 0 00-1 1v16a1 1 0 001 1h2" />
+                </svg>
+                <span>Max 10MB</span>
+              </div>
+            </div>
           </motion.div>
 
           {/* Error message */}
@@ -234,15 +275,15 @@ const ResumeUpload = ({ onFileSelect, className = '' }) => {
             </button>
           </div>
 
-                          {/* Progress Bar */}
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">
-                        {selectedFile.type === 'application/pdf' ? 'Processing PDF...' : 'Processing file...'}
-                      </span>
-                      <span className="text-sm text-[#2D6A4F] font-medium">{uploadProgress}%</span>
-                    </div>
+          {/* Progress Bar */}
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">
+                  {isExtracting ? 'Extracting text from PDF...' : 'Processing PDF...'}
+                </span>
+                <span className="text-sm text-[#2D6A4F] font-medium">{uploadProgress}%</span>
+              </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <motion.div
                   className="h-2 bg-gradient-to-r from-[#2D6A4F] to-[#22503B] rounded-full"
@@ -259,12 +300,19 @@ const ResumeUpload = ({ onFileSelect, className = '' }) => {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 text-[#2D6A4F] text-sm font-medium"
+              className="space-y-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Resume uploaded successfully!
+              <div className="flex items-center gap-2 text-[#2D6A4F] text-sm font-medium">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                PDF text extracted successfully!
+              </div>
+              {extractedText && (
+                <div className="text-xs text-gray-600">
+                  Extracted {extractedText.length} characters from PDF
+                </div>
+              )}
             </motion.div>
           )}
         </motion.div>
