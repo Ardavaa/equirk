@@ -32,6 +32,10 @@ function JobRecommendations() {
     navigate('/dashboard');
   };
 
+  const handleNavigation = (section) => {
+    navigate(`/#${section}`);
+  };
+
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -67,13 +71,13 @@ function JobRecommendations() {
        {/* Navigation - Fixed like landing page */}
        <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
          <img src={Logo} alt="logo" className="w-[9%] h-auto" />
-        <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Features</a></li>
-          <li><a href="#">Career</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
+                 <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
+           <li><button onClick={() => handleNavigation('')} className="hover:text-emerald-700 transition-colors">Home</button></li>
+           <li><button onClick={() => handleNavigation('about')} className="hover:text-emerald-700 transition-colors">About</button></li>
+           <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
+           <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
+           <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
+         </ul>
         <div className="flex items-center space-x-4">
           <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
             <span>Welcome:</span>
