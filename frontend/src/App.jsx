@@ -12,6 +12,7 @@ import CareerSection from './components/CareerSection';
 import { AuthProvider } from './contexts/AuthContext';
 import AuthStatus from './components/AuthStatus';
 import Dashboard from './components/Dashboard';
+import JobRecommendations from './pages/JobRecommendations';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function MainLanding() {
@@ -54,6 +55,7 @@ function App() {
           <Routes>
             <Route path="/" element={<MainLanding />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/job-recommendations" element={<JobRecommendations />} />
           </Routes>
         </div>
       </BrowserRouter>
