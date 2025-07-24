@@ -12,6 +12,7 @@ function Dashboard() {
   const [selectedSkills, setSelectedSkills] = useState([]); // New state for skills
   const [selectedResume, setSelectedResume] = useState(null); // New state for resume
   const [extractedText, setExtractedText] = useState(''); // New state for extracted text
+  const [jobRecommendations, setJobRecommendations] = useState([]); // New state for job recommendations
   const navigate = useNavigate();
 
   const disabilityTypes = [
@@ -71,15 +72,30 @@ function Dashboard() {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      // Final completion - show completion message
+      // Final completion - navigate to job recommendations page
       console.log('Onboarding completed!', {
         disabilities: selectedDisabilities,
         jobs: selectedJobs,
         skills: selectedSkills,
         resume: selectedResume,
-        extractedText: extractedText
+        extractedText: extractedText,
+        jobRecommendations: jobRecommendations
       });
-      alert('Profile setup completed successfully!');
+      
+      // Scroll to top before navigation
+      window.scrollTo(0, 0);
+      
+      // Navigate to job recommendations page with all data
+      navigate('/job-recommendations', {
+        state: {
+          disabilities: selectedDisabilities,
+          jobs: selectedJobs,
+          skills: selectedSkills,
+          resume: selectedResume,
+          extractedText: extractedText,
+          jobRecommendations: jobRecommendations
+        }
+      });
     }
   };
 
@@ -93,6 +109,11 @@ function Dashboard() {
     console.log('Text extracted from PDF:', text);
   };
 
+  const handleJobRecommendations = (recommendations) => {
+    setJobRecommendations(recommendations);
+    console.log('Job recommendations received:', recommendations);
+  };
+
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
@@ -101,7 +122,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
         <img src={Logo} alt="logo" className="w-[9%] h-auto" />
         <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
           <li><a href="#">Home</a></li>
@@ -139,7 +160,7 @@ function Dashboard() {
         </div>
       </nav>
 
-      <div className="px-20 py-8">
+      <div className="px-20 py-8 pt-28">
         <div className="relative flex justify-between items-start max-w-[1280px] mx-auto">
           <div className="absolute top-3 h-0.5" style={{ left: '9%', right: '12%', backgroundColor: '#eaf1ee' }}></div>
 
@@ -366,6 +387,7 @@ function Dashboard() {
                       <ResumeUpload 
                         onFileSelect={handleResumeSelect} 
                         onTextExtracted={handleTextExtracted}
+                        onJobRecommendations={handleJobRecommendations}
                       />
                     </div>
                   </div>
