@@ -2,13 +2,15 @@ import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
-const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
+const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, className = '' }) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [extractedText, setExtractedText] = useState('');
   const [isExtracting, setIsExtracting] = useState(false);
+  const [jobRecommendations, setJobRecommendations] = useState([]);
+  const [isGettingRecommendations, setIsGettingRecommendations] = useState(false);
   const fileInputRef = useRef(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -68,6 +70,27 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
     return result.text;
   };
 
+  const getJobRecommendations = async (cvText) => {
+    const response = await fetch('http://localhost:5000/recommend-jobs-batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cv_text: cvText,
+        top_n: 5
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to get job recommendations');
+    }
+
+    const result = await response.json();
+    return result.recommendations;
+  };
+
   const processFile = async (file) => {
     if (!validateFile(file)) return;
 
@@ -80,25 +103,46 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
       // Show progress for file processing
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
-          if (prev >= 90) {
+          if (prev >= 70) {
             clearInterval(progressInterval);
-            return 90;
+            return 70;
           }
-          return prev + 15;
+          return prev + 10;
         });
       }, 200);
 
       // Extract text from PDF using backend API
       const text = await extractTextFromBackend(file);
       
-      // Complete progress
+      // Update progress
       clearInterval(progressInterval);
-      setUploadProgress(100);
+      setUploadProgress(80);
       setExtractedText(text);
       setIsExtracting(false);
       
       // Log the extracted text (as requested)
       console.log('EXTRACTED TEXT:', text);
+      
+      // Get job recommendations
+      setIsGettingRecommendations(true);
+      setUploadProgress(85);
+      
+      try {
+        const recommendations = await getJobRecommendations(text);
+        setJobRecommendations(recommendations);
+        console.log('JOB RECOMMENDATIONS:', recommendations);
+        
+        // Call callback to pass recommendations to parent
+        if (onJobRecommendations) onJobRecommendations(recommendations);
+        
+        setUploadProgress(100);
+      } catch (recError) {
+        console.warn('Failed to get job recommendations:', recError);
+        // Continue without recommendations
+        setUploadProgress(100);
+      }
+      
+      setIsGettingRecommendations(false);
       
       // Call callbacks
       if (onFileSelect) onFileSelect(file);
@@ -108,6 +152,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
       console.error('PDF processing error:', error);
       setError('Failed to extract text from PDF. Please try again.');
       setIsExtracting(false);
+      setIsGettingRecommendations(false);
       setUploadProgress(0);
     }
   };
@@ -280,7 +325,12 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-gray-600">
-                  {isExtracting ? 'Extracting text from PDF...' : 'Processing PDF...'}
+                  {isGettingRecommendations 
+                    ? 'Getting job recommendations...' 
+                    : isExtracting 
+                      ? 'Extracting text from PDF...' 
+                      : 'Processing PDF...'
+                  }
                 </span>
                 <span className="text-sm text-[#2D6A4F] font-medium">{uploadProgress}%</span>
               </div>
@@ -306,11 +356,16 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, className = '' }) => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                PDF text extracted successfully!
+                PDF processed successfully!
               </div>
               {extractedText && (
                 <div className="text-xs text-gray-600">
                   Extracted {extractedText.length} characters from PDF
+                </div>
+              )}
+              {jobRecommendations.length > 0 && (
+                <div className="text-xs text-[#2D6A4F] mt-1">
+                  ✨ Found {jobRecommendations.length} job recommendations
                 </div>
               )}
             </motion.div>
