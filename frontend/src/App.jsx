@@ -13,6 +13,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import AuthStatus from './components/AuthStatus';
 import Dashboard from './components/Dashboard';
 import JobRecommendations from './pages/JobRecommendations';
+import Course from './pages/Course';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function MainLanding() {
@@ -56,6 +57,7 @@ function App() {
             <Route path="/" element={<MainLanding />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/job-recommendations" element={<JobRecommendations />} />
+            <Route path="/course" element={<Course />} />
           </Routes>
         </div>
       </BrowserRouter>

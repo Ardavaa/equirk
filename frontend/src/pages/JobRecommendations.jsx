@@ -169,7 +169,10 @@ function JobRecommendations() {
                    
                                                                                {/* Bottom Section with Button */}
                      <div className="border-t border-gray-200 pt-4 flex justify-end">
-                       <button className="bg-emerald-800 text-white px-6 py-3 rounded-md hover:bg-emerald-700 transition font-medium">
+                       <button
+                         className="bg-emerald-800 text-white px-6 py-3 rounded-md hover:bg-emerald-700 transition font-medium"
+                         onClick={() => navigate('/course', { state: { jobTitle: job.title } })}
+                       >
                          View Skills Roadmap
                        </button>
                      </div>
