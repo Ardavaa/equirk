@@ -11,6 +11,7 @@ function Dashboard() {
   const [selectedJobs, setSelectedJobs] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]); // New state for skills
   const [selectedResume, setSelectedResume] = useState(null); // New state for resume
+  const [extractedText, setExtractedText] = useState(''); // New state for extracted text
   const navigate = useNavigate();
 
   const disabilityTypes = [
@@ -75,7 +76,8 @@ function Dashboard() {
         disabilities: selectedDisabilities,
         jobs: selectedJobs,
         skills: selectedSkills,
-        resume: selectedResume
+        resume: selectedResume,
+        extractedText: extractedText
       });
       alert('Profile setup completed successfully!');
     }
@@ -84,6 +86,11 @@ function Dashboard() {
   const handleResumeSelect = (file) => {
     setSelectedResume(file);
     console.log('Resume selected:', file);
+  };
+
+  const handleTextExtracted = (text) => {
+    setExtractedText(text);
+    console.log('Text extracted from PDF:', text);
   };
 
   const handleBack = () => {
@@ -356,7 +363,10 @@ function Dashboard() {
                     <div>
                       <label className="block text-base font-medium text-custom-dark mb-3">Upload Resume/CV</label>
                       <p className="text-sm text-gray-500 mb-4">Upload your resume and we'll automatically extract your skills.</p>
-                      <ResumeUpload onFileSelect={handleResumeSelect} />
+                      <ResumeUpload 
+                        onFileSelect={handleResumeSelect} 
+                        onTextExtracted={handleTextExtracted}
+                      />
                     </div>
                   </div>
                 </div>
