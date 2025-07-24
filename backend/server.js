@@ -1,7 +1,10 @@
+
+require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const cors = require('cors');
+const { generateRoadmap } = require('./roadmap_generator');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -84,6 +87,33 @@ app.use((error, req, res, next) => {
     error: 'Server error',
     message: error.message
   });
+});
+
+
+// Roadmap generator endpoint
+app.get('/api/roadmap', async (req, res) => {
+  const { job } = req.query;
+  console.log('Roadmap request received for job:', job);
+  if (!job) return res.status(400).json({ error: 'Missing job parameter' });
+  
+  try {
+    console.log('Generating roadmap...');
+    const roadmap = await generateRoadmap(job);
+    console.log('Roadmap generated:', roadmap);
+    
+    // Since generateRoadmap now returns arrays directly, just validate they exist and are arrays
+    const safe = {
+      basic: Array.isArray(roadmap.basic) ? roadmap.basic : [],
+      intermediate: Array.isArray(roadmap.intermediate) ? roadmap.intermediate : [],
+      advanced: Array.isArray(roadmap.advanced) ? roadmap.advanced : []
+    };
+    
+    console.log('Safe roadmap:', safe);
+    res.json(safe);
+  } catch (e) {
+    console.error('Roadmap generation error:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Start server
