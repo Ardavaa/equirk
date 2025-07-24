@@ -1,83 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 import { useAuth } from '../contexts/AuthContext';
-
-const SKILL_MAP = [
-  {
-    section: 'Basic',
-    description: 'Learn what content writing is, how to express ideas clearly, and understand basic tools and formats.',
-    skills: [
-      {
-        title: 'What is Content Writing',
-        description: 'Learn the purpose of content writing and how it differs from other types of writing like journalism or copywriting.',
-        resources: 'See resources here',
-      },
-      {
-        title: 'SEO basics',
-        description: '',
-        resources: '',
-      },
-      {
-        title: 'Short-form writing practice',
-        description: '',
-        resources: '',
-      },
-      {
-        title: 'Grammar & clarity tools',
-        description: '',
-        resources: '',
-      },
-    ],
-  },
-  {
-    section: 'Intermediate',
-    description: 'Dive into copywriting techniques, adapt tone and format for different platforms, and start building strategy into your writing.',
-    skills: [
-      {
-        title: 'Copywriting techniques',
-        description: 'Understand the core principles of persuasive writing from crafting compelling headlines.',
-        resources: 'See resources here',
-      },
-      {
-        title: 'Tone & style variation',
-        description: '',
-        resources: '',
-      },
-      {
-        title: 'Writing for different platforms',
-        description: '',
-        resources: '',
-      },
-    ],
-  },
-  {
-    section: 'Advanced',
-    description: 'Learn how to plan content strategically, write for global audiences, and build a portfolio that helps you land freelance or remote jobs.',
-    skills: [
-      {
-        title: 'Content strategy & editorial planning',
-        description: 'Learn how to plan, organize, and manage content ideas that align with audience needs and business goals.',
-        resources: 'See resources here',
-      },
-      {
-        title: 'Writing for global audiences',
-        description: '',
-        resources: '',
-      },
-      {
-        title: 'Building a portfolio',
-        description: '',
-        resources: '',
-      },
-      {
-        title: 'Finding freelance/remote job opportunities',
-        description: '',
-        resources: '',
-      },
-    ],
-  },
-];
 
 function Course() {
   const location = useLocation();
@@ -88,7 +12,43 @@ function Course() {
   const jobTitle = location.state?.jobTitle || 'Content Writer';
 
   // Track which skill is open per section
-  const [openIndexes, setOpenIndexes] = useState({ Basic: 0, Intermediate: 0, Advanced: 0 });
+  const [openIndexes, setOpenIndexes] = useState({ basic: 0, intermediate: 0, advanced: 0 });
+
+  // Roadmap state
+  const [roadmap, setRoadmap] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Section meta info
+  const sectionList = [
+    { key: 'basic', label: 'Basic', description: 'Learn what content writing is, how to express ideas clearly, and understand basic tools and formats.' },
+    { key: 'intermediate', label: 'Intermediate', description: 'Dive into copywriting techniques, adapt tone and format for different platforms, and start building strategy into your writing.' },
+    { key: 'advanced', label: 'Advanced', description: 'Learn how to plan content strategically, write for global audiences, and build a portfolio that helps you land freelance or remote jobs.' }
+  ];
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    console.log('Fetching roadmap for:', jobTitle);
+    fetch(`/api/roadmap?job=${encodeURIComponent(jobTitle)}`)
+      .then(res => {
+        console.log('Response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Roadmap data received:', data);
+        setRoadmap(data);
+        setLoading(false);
+      })
+      .catch(e => {
+        console.error('Fetch error:', e);
+        setError(e.message);
+        setLoading(false);
+      });
+  }, [jobTitle]);
 
   const truncatePrincipal = (principal) => {
     if (!principal) return '';
@@ -140,56 +100,66 @@ function Course() {
       <div className="px-20 py-10 pt-28">
         <div className="max-w-[1280px] mx-auto">
           <h1 className="text-4xl font-bold text-[#252525] mb-12">{jobTitle} Skill Roadmap</h1>
-          <div className="flex gap-16 items-start">
-            {/* Left column: Section headers */}
-            <div className="w-1/3 flex flex-col gap-24">
-              {SKILL_MAP.map((section) => (
-                <div key={section.section}>
-                  <h2 className="text-xl font-semibold text-[#252525] mb-2">{section.section}</h2>
-                  <p className="text-base text-[#888] max-w-xs">{section.description}</p>
-                </div>
-              ))}
-            </div>
-            {/* Right column: Skills accordions */}
-            <div className="flex-1 flex flex-col gap-24">
-              {SKILL_MAP.map((section, sIdx) => (
-                <div key={section.section}>
-                  <div className="flex flex-col gap-3">
-                    {section.skills.map((skill, idx) => (
-                      <div key={skill.title}>
-                        <button
-                          className={`w-full flex items-center text-left px-0 py-4 border-b border-gray-100 focus:outline-none transition group ${openIndexes[section.section] === idx ? 'bg-gray-50' : ''}`}
-                          onClick={() => handleAccordion(section.section, idx)}
-                        >
-                          <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#eaf1ee] text-emerald-800 font-bold text-lg mr-5 border border-[#eaf1ee]">
-                            {String(idx + 1).padStart(2, '0')}
-                          </span>
-                          <span className="text-lg font-medium text-[#252525]">{skill.title}</span>
-                          <span className={`ml-auto transition-transform ${openIndexes[section.section] === idx ? 'rotate-180' : ''}`}>
-                            <svg width="20" height="20" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-                          </span>
-                        </button>
-                        {/* Expanded content */}
-                        {openIndexes[section.section] === idx && (
-                          <div className="pl-16 pb-4">
-                            {skill.description && (
-                              <p className="text-[#888] text-base mb-2">{skill.description}</p>
-                            )}
-                            {skill.resources && (
-                              <a href="#" className="text-emerald-800 font-medium flex items-center gap-1 hover:underline">
-                                {skill.resources}
-                                <svg width="16" height="16" fill="none" stroke="#377056" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                              </a>
+          {loading ? (
+            <div className="text-lg text-gray-500">Loading roadmap...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : roadmap ? (
+            <div className="flex gap-16 items-start">
+              {/* Left column: Section headers */}
+              <div className="w-1/3 flex flex-col gap-24">
+                {sectionList.map(section => (
+                  <div key={section.key}>
+                    <h2 className="text-xl font-semibold text-[#252525] mb-2">{section.label}</h2>
+                    <p className="text-base text-[#888] max-w-xs">{section.description}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Right column: Skills accordions */}
+              <div className="flex-1 flex flex-col gap-24">
+                {sectionList.map((section, sIdx) => {
+                  const skills = Array.isArray(roadmap[section.key]) ? roadmap[section.key] : [];
+                  return (
+                    <div key={section.key}>
+                      <div className="flex flex-col gap-3">
+                        {skills.map((skill, idx) => (
+                          <div key={skill.title || idx}>
+                            <button
+                              className={`w-full flex items-center text-left px-0 py-4 border-b border-gray-100 focus:outline-none transition group ${openIndexes[section.key] === idx ? 'bg-gray-50' : ''}`}
+                              onClick={() => handleAccordion(section.key, idx)}
+                            >
+                              <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#eaf1ee] text-emerald-800 font-bold text-lg mr-5 border border-[#eaf1ee]">
+                                {String(idx + 1).padStart(2, '0')}
+                              </span>
+                              <span className="text-lg font-medium text-[#252525]">{skill.title}</span>
+                              <span className={`ml-auto transition-transform ${openIndexes[section.key] === idx ? 'rotate-180' : ''}`}>
+                                <svg width="20" height="20" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                              </span>
+                            </button>
+                            {/* Expanded content */}
+                            {openIndexes[section.key] === idx && (
+                              <div className="pl-16 pb-4">
+                                {skill.description && (
+                                  <p className="text-[#888] text-base mb-2">{skill.description}</p>
+                                )}
+                                {/* Optional: resources, if LLM returns */}
+                                {skill.resources && (
+                                  <a href="#" className="text-emerald-800 font-medium flex items-center gap-1 hover:underline">
+                                    {skill.resources}
+                                    <svg width="16" height="16" fill="none" stroke="#377056" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                  </a>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
 
