@@ -1,4 +1,4 @@
-
-# YoYo AI version control directory
 .yoyo/
 .vscode/
+.venv/
+.cursor/
