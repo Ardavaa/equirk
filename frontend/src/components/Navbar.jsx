@@ -1,6 +1,7 @@
 // src/components/Navbar.jsx
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useReducedMotion, getAccessibleTransition } from '../hooks/useReducedMotion';
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const navigate = useNavigate();
 
   // Track scroll position to add background blur effect
   useEffect(() => {
@@ -113,6 +115,16 @@ export default function Navbar() {
               Contact
             </button>
           </li>
+          {isAuthenticated && (
+            <li>
+              <button 
+                onClick={() => navigate('/library')}
+                className="hover:text-[#2D6A4F] transition-colors duration-200"
+              >
+                Library
+              </button>
+            </li>
+          )}
         </ul>
 
         <div className="flex items-center space-x-4">
@@ -214,14 +226,26 @@ export default function Navbar() {
               </button>
               
               {isAuthenticated && (
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <span>Welcome:</span>
-                    <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                      {truncatePrincipal(principal)}
-                    </span>
+                <>
+                  <button 
+                    onClick={() => {
+                      navigate('/library');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left text-lg text-gray-700 hover:text-[#2D6A4F] transition-colors duration-200"
+                  >
+                    Library
+                  </button>
+                  
+                  <div className="pt-4 border-t border-gray-200">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>Welcome:</span>
+                      <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
+                        {truncatePrincipal(principal)}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
           </motion.div>
