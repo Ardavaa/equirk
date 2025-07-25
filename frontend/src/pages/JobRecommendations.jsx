@@ -77,6 +77,7 @@ function JobRecommendations() {
            <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
            <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
            <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
+           <li><button onClick={() => navigate('/library')} className="hover:text-emerald-700 transition-colors">Library</button></li>
          </ul>
         <div className="flex items-center space-x-4">
           <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
