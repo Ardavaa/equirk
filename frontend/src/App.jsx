@@ -14,6 +14,7 @@ import AuthStatus from './components/AuthStatus';
 import Dashboard from './components/Dashboard';
 import JobRecommendations from './pages/JobRecommendations';
 import Course from './pages/Course';
+import Library from './pages/Library';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function MainLanding() {
@@ -58,6 +59,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/job-recommendations" element={<JobRecommendations />} />
             <Route path="/course" element={<Course />} />
+            <Route path="/library" element={<Library />} />
           </Routes>
         </div>
       </BrowserRouter>
