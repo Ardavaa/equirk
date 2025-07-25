@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Logo from '../assets/Logo.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,8 @@ function Dashboard() {
   const [extractedText, setExtractedText] = useState(''); // New state for extracted text
   const [jobRecommendations, setJobRecommendations] = useState([]); // New state for job recommendations
   const navigate = useNavigate();
+
+
 
   const disabilityTypes = [
     'Visual impairment',
@@ -85,10 +87,10 @@ function Dashboard() {
         extractedText: extractedText,
         jobRecommendations: jobRecommendations
       });
-      
+
       // Scroll to top before navigation
       window.scrollTo(0, 0);
-      
+
       // Navigate to job recommendations page with all data
       navigate('/job-recommendations', {
         state: {
@@ -128,13 +130,14 @@ function Dashboard() {
     <div className="min-h-screen bg-white">
       <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
         <img src={Logo} alt="logo" className="w-[9%] h-auto" />
-                 <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
-           <li><button onClick={() => handleNavigation('')} className="hover:text-emerald-700 transition-colors">Home</button></li>
-           <li><button onClick={() => handleNavigation('about')} className="hover:text-emerald-700 transition-colors">About</button></li>
-           <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
-           <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
-           <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
-         </ul>
+        <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
+          <li><button onClick={() => handleNavigation('')} className="hover:text-emerald-700 transition-colors">Home</button></li>
+          <li><button onClick={() => handleNavigation('about')} className="hover:text-emerald-700 transition-colors">About</button></li>
+          <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
+          <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
+          <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
+          <li><button onClick={() => navigate('/library')} className="hover:text-emerald-700 transition-colors">Library</button></li>
+        </ul>
         <div className="flex items-center space-x-4">
           {isAuthenticated && (
             <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
@@ -241,11 +244,10 @@ function Dashboard() {
                               key={index}
                               onClick={() => handleDisabilitySelect(disability)}
                               disabled={selectedDisabilities.includes(disability)}
-                              className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${
-                                selectedDisabilities.includes(disability)
-                                  ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-                                  : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
-                              }`}
+                              className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${selectedDisabilities.includes(disability)
+                                ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
+                                }`}
                             >
                               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                 <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
@@ -297,11 +299,10 @@ function Dashboard() {
                               key={index}
                               onClick={() => handleJobSelect(job)}
                               disabled={selectedJobs.includes(job)}
-                              className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${
-                                selectedJobs.includes(job)
-                                  ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-                                  : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
-                              }`}
+                              className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${selectedJobs.includes(job)
+                                ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
+                                }`}
                             >
                               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                 <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
@@ -355,11 +356,10 @@ function Dashboard() {
                                 key={index}
                                 onClick={() => handleSkillSelect(skill)}
                                 disabled={selectedSkills.includes(skill)}
-                                className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${
-                                  selectedSkills.includes(skill)
-                                    ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
-                                }`}
+                                className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${selectedSkills.includes(skill)
+                                  ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                                  : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
+                                  }`}
                               >
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                   <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
@@ -388,8 +388,8 @@ function Dashboard() {
                     <div>
                       <label className="block text-base font-medium text-custom-dark mb-3">Upload Resume/CV</label>
                       <p className="text-sm text-gray-500 mb-4">Upload your resume and we'll automatically extract your skills.</p>
-                      <ResumeUpload 
-                        onFileSelect={handleResumeSelect} 
+                      <ResumeUpload
+                        onFileSelect={handleResumeSelect}
                         onTextExtracted={handleTextExtracted}
                         onJobRecommendations={handleJobRecommendations}
                       />
