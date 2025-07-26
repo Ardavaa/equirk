@@ -4,3 +4,4 @@
 .cursor/
 .env*
 .kiro/
+.dfx/
