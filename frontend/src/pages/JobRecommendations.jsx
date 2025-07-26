@@ -3,13 +3,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from '../assets/Logo.png';
 import { useAuth } from '../contexts/AuthContext';
+import { useJobRecommendations } from '../contexts/JobRecommendationsContext';
 
 function JobRecommendations() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, principal, isLoading } = useAuth();
+  const { jobRecommendationsData, saveJobRecommendationsData, hasJobRecommendationsData } = useJobRecommendations();
   
-  // Get data from navigation state
+  // Get data from navigation state or context
+  const stateData = location.state || {};
   const {
     disabilities = [],
     jobs = [],
@@ -17,7 +20,19 @@ function JobRecommendations() {
     resume = null,
     extractedText = '',
     jobRecommendations = []
-  } = location.state || {};
+  } = stateData;
+
+  // Use context data if location state is empty but context has data
+  const currentData = (jobRecommendations.length > 0 || !hasJobRecommendationsData()) 
+    ? stateData 
+    : jobRecommendationsData;
+
+  // Save data to context when new data comes from location state
+  useEffect(() => {
+    if (jobRecommendations.length > 0) {
+      saveJobRecommendationsData(stateData);
+    }
+  }, [jobRecommendations, stateData, saveJobRecommendationsData]);
 
   const truncatePrincipal = (principal) => {
     if (!principal) return '';
@@ -77,7 +92,6 @@ function JobRecommendations() {
            <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
            <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
            <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
-           <li><button onClick={() => navigate('/library')} className="hover:text-emerald-700 transition-colors">Library</button></li>
          </ul>
         <div className="flex items-center space-x-4">
           <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
@@ -116,9 +130,9 @@ function JobRecommendations() {
             </div>
 
           {/* Job Cards */}
-          {jobRecommendations.length > 0 ? (
+          {currentData.jobRecommendations && currentData.jobRecommendations.length > 0 ? (
             <div className="flex flex-col gap-4">
-              {jobRecommendations.map((job, index) => (
+              {currentData.jobRecommendations.map((job, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
@@ -172,7 +186,12 @@ function JobRecommendations() {
                      <div className="border-t border-gray-200 pt-4 flex justify-end">
                        <button
                          className="bg-emerald-800 text-white px-6 py-3 rounded-md hover:bg-emerald-700 transition font-medium"
-                         onClick={() => navigate('/course', { state: { jobTitle: job.title } })}
+                         onClick={() => navigate('/course', { 
+                           state: { 
+                             jobTitle: job.title,
+                             disabilities: currentData.disabilities || disabilities
+                           } 
+                         })}
                        >
                          View Skills Roadmap
                        </button>

@@ -115,16 +115,6 @@ export default function Navbar() {
               Contact
             </button>
           </li>
-          {isAuthenticated && (
-            <li>
-              <button 
-                onClick={() => navigate('/library')}
-                className="hover:text-[#2D6A4F] transition-colors duration-200"
-              >
-                Library
-              </button>
-            </li>
-          )}
         </ul>
 
         <div className="flex items-center space-x-4">
@@ -226,26 +216,14 @@ export default function Navbar() {
               </button>
               
               {isAuthenticated && (
-                <>
-                  <button 
-                    onClick={() => {
-                      navigate('/library');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="block w-full text-left text-lg text-gray-700 hover:text-[#2D6A4F] transition-colors duration-200"
-                  >
-                    Library
-                  </button>
-                  
-                  <div className="pt-4 border-t border-gray-200">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <span>Welcome:</span>
-                      <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                        {truncatePrincipal(principal)}
-                      </span>
-                    </div>
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <span>Welcome:</span>
+                    <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
+                      {truncatePrincipal(principal)}
+                    </span>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </motion.div>
