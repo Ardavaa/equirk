@@ -1,17 +1,17 @@
 const fs = require("fs");
 const path = require("path");
-const { ChatOpenAI } = require("@langchain/openai");
+const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 
-// Initialize LangChain with OpenRouter using Gemma model
-const llm = new ChatOpenAI({
-  model: "google/gemma-3n-e2b-it:free",
-  apiKey: process.env.OPENROUTER_API_KEY,
-  configuration: {
-    baseURL: "https://openrouter.ai/api/v1",
-  },
+// Initialize with Google Gemini (more stable than OpenRouter)
+const llm = new ChatGoogleGenerativeAI({
+  model: "gemini-1.5-flash",
+  apiKey: process.env.GEMINI_API_KEY,
   temperature: 0.7,
-  maxTokens: 2048,
+  maxOutputTokens: 2048,
 });
+
+console.log("[LLM] Using Google Gemini API");
+console.log("[LLM] API Key present:", process.env.GEMINI_API_KEY ? "✓ Yes" : "✗ No");
 
 // Cache untuk mencegah repetitive API calls
 const roadmapCache = new Map();
@@ -28,23 +28,26 @@ function loadPrompt(filename, vars = {}) {
 async function generateCompleteRoadmap(prompt, cacheKey) {
   // Check cache first
   if (roadmapCache.has(cacheKey)) {
-    console.log("[OpenRouter Gemma] Using cached result for:", cacheKey);
+    console.log("[Gemini] Using cached result for:", cacheKey);
     return roadmapCache.get(cacheKey);
   }
 
   // Check if request is already pending
   if (pendingRequests.has(cacheKey)) {
-    console.log("[OpenRouter Gemma] Waiting for pending request:", cacheKey);
+    console.log("[Gemini] Waiting for pending request:", cacheKey);
     return await pendingRequests.get(cacheKey);
   }
 
   // Create new request
   const requestPromise = (async () => {
     try {
+      console.log("[LLM] Making API request...");
+      console.log("[LLM] Using API key:", process.env.OPENROUTER_API_KEY ? "Present" : "Missing");
+      
       const response = await llm.invoke(prompt);
       const text = response.content.trim();
 
-      console.log("[OpenRouter Gemma] Raw response:", text.slice(0, 300) + "...");
+      console.log("[Gemini] Raw response:", text.slice(0, 300) + "...");
 
       // Extract JSON from markdown code blocks or raw text
       let jsonText = text;
@@ -65,7 +68,7 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
       try {
         const parsed = JSON.parse(jsonText);
         if (parsed && typeof parsed === 'object' && parsed.basic && parsed.intermediate && parsed.advanced) {
-          console.log("[OpenRouter Gemma] Successfully parsed complete roadmap");
+          console.log("[Gemini] Successfully parsed complete roadmap");
           // Cache the result
           roadmapCache.set(cacheKey, parsed);
           return parsed;
@@ -73,8 +76,8 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
           throw new Error("Invalid roadmap structure");
         }
       } catch (e) {
-        console.error("[OpenRouter Gemma] JSON parsing failed:", e.message);
-        console.error("[OpenRouter Gemma] Attempted to parse:", jsonText.slice(0, 500));
+        console.error("[Gemini] JSON parsing failed:", e.message);
+        console.error("[Gemini] Attempted to parse:", jsonText.slice(0, 500));
 
         // Return a fallback roadmap structure
         const fallback = {
