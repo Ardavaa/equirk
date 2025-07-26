@@ -1,8 +1,14 @@
 
 # `equirk`
-![Banner GithHub](doc/GitHub%20Banner.png)
+![Banner GitHub](doc/GitHub%20Banner.png)
 
-Equirk is a web-based platform that empowers people with disabilities to discover inclusive career opportunities and personalized skill roadmaps. By leveraging cutting-edge Web3 technology, equirk ensures a more accessible, transparent, and empowering job-matching and learning experience for users with diverse abilities.
+**AI-Powered Inclusive Career Development Platform**
+
+Equirk is an AI-powered career development platform that provides personalized guidance for everyone, regardless of ability. Using LLM and Internet Computer Protocol (ICP), it combines personalized career roadmaps with accessibility-first design to democratize career development.
+
+## The Problem
+
+Career platforms exclude people with disabilities and lack personalized guidance. EQUIRK creates an inclusive AI-powered platform using Google Gemini for personalized roadmaps and accessibility-focused job matching on ICP blockchain.
 
 ---
 
@@ -18,68 +24,202 @@ Equirk is a web-based platform that empowers people with disabilities to discove
 ---
 
 ## 🚀 Features
-- **Internet Identity Authentication:** provides personalized access to users keeping their data private and secure using Internet Identity.
-- **Inclusive Job Matching**: Matches users with curated, disability-friendly job opportunities based on their profile, interests, and skills.
-- **Personalized Skill Roadmap:** Recommends step-by-step learning paths and essential skills tailored to each user’s career goals and abilities
-- **Accessible Job Board**: Displays a list of inclusive job openings, complete with company details, required skills, and accessibility information.
-- **Progress Tracking**: Allows users to monitor their skill development and career readiness over time.
-- **Flexible Work Preferences**: Supports user preferences for remote or onsite work, ensuring better job-person fit.
-- **Resource Recommendations**: Suggests relevant learning materials, including articles, videos, and exercises, to help users upskill at their own pace.--
 
-Welcome to your new `equirk` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+- **🔐 Internet Identity Authentication**: Secure, decentralized authentication using ICP's Internet Identity
+- **🤖 AI-Powered Career Roadmaps**: Personalized learning paths generated using Large Language Model
+- **♿ Accessibility & Inclusion**: Specialized guidance for users with disabilities and accessibility considerations
+- **📄 Resume Analysis**: PDF resume upload and AI-powered text extraction for skill assessment
+- **🎯 Intelligent Job Matching**: ML algorithms that match users with suitable career opportunities
+- **📊 Skill Level Adaptation**: Customized guidance for beginner, intermediate, and advanced skill levels
+- **🌐 Decentralized Frontend**: Frontend deployed as canister on Internet Computer Protocol
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+---
 
-To learn more before you start working with `equirk`, see the following documentation available online:
+## 🛠️ Tech Stack
 
-- [Quick Start](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
-- [SDK Developer Tools](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-- [Motoko Programming Language Guide](https://internetcomputer.org/docs/current/motoko/main/motoko)
-- [Motoko Language Quick Reference](https://internetcomputer.org/docs/current/motoko/main/language-manual)
+**Frontend:**
+- React 19.1.0 with Vite
+- Tailwind CSS 4.1.11
+- Framer Motion for animations
+- React Router DOM for navigation
+- PDF.js for resume processing
 
-If you want to start working on your project right away, you might want to try the following commands:
+**Backend:**
+- Node.js with Express
+- Google Gemini LLM (@langchain/google-genai)
+- PDF parsing with pdf-parse
+- Multer for file uploads
+- Python Flask (for ML recommendation system)
 
+**Machine Learning:**
+- Python 3.8+
+- Flask for ML API
+- Pandas, NumPy for data processing
+- Scikit-learn for job matching algorithms
+
+**Blockchain:**
+- Internet Computer Protocol (ICP)
+- DFX for canister deployment
+- Internet Identity for authentication
+
+---
+
+## 📋 Requirements
+
+**System Requirements:**
+- Node.js 18+ 
+- Python 3.8+
+- npm or yarn
+- pip (Python package manager)
+- DFX SDK (for ICP deployment)
+
+**API Keys Required:**
+- Google Gemini API Key (for AI features)
+
+---
+
+## 🚀 How to Run the App
+
+### 1. Clone the Repository
 ```bash
-cd equirk/
-dfx help
-dfx canister --help
+git clone https://github.com/Ardavaa/equirk.git
+cd equirk
 ```
 
-## Running the project locally
+### 2. Setup Environment Variables
+Create `.env` file in the `backend` directory:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_API_KEY=your_gemini_api_key_here
+```
 
-If you want to test your project locally, you can use the following commands:
+### 3. Setup Python Virtual Environment
 
+**Create and activate virtual environment:**
 ```bash
-# Starts the replica, running in the background
-dfx start --background
+# Create virtual environment
+python -m venv venv
 
-# Deploys your canisters to the replica and generates your candid interface
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r backend/requirements.txt
+```
+
+### 4. Install Dependencies
+
+**Backend (Node.js):**
+```bash
+cd backend
+npm install
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+```
+
+### 5. Run the Application
+
+**Start Python Flask Recommender (Terminal 1):**
+```bash
+# Make sure virtual environment is activated
+cd backend
+python flask_recommender.py
+```
+Flask recommender will run on `http://localhost:5000`
+
+**Start Node.js Backend Server (Terminal 2):**
+```bash
+cd backend
+node server.js
+```
+Backend will run on `http://localhost:3001`
+Backend will run on `http://localhost:3001`
+
+**Start Frontend Development Server (Terminal 3):**
+```bash
+cd frontend
+npm run dev
+```
+Frontend will run on `http://localhost:5174`
+
+**Access the Application:**
+- Frontend: `http://localhost:5174`
+- Node.js Backend: `http://localhost:3001`  
+- Flask ML Service: `http://localhost:5000`
+
+### 6. Deploy to Internet Computer (Optional)
+
+**Build Frontend:**
+```bash
+cd frontend
+npm run build
+```
+
+**Start DFX and Deploy:**
+```bash
+dfx start --background
 dfx deploy
 ```
 
-Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
+---
 
-If you have made changes to your backend canister, you can generate a new candid interface with
+## 🔮 Future Work
 
-```bash
-npm run generate
-```
+### Planned Enhancements
 
-at any time. This is recommended before starting the frontend development server, and will be run automatically any time you run `dfx deploy`.
+**1. Live Job API Integration**
+- Integration with live job posting APIs (LinkedIn, Indeed, Glassdoor)
+- Real-time CV matching with live job opportunities  
+- Automated job recommendation notifications
+- Company accessibility rating system
 
-If you are making frontend changes, you can start a development server with
+**2. Enhanced Disability Support**
+- More comprehensive disability categories and accommodations
+- Voice-to-text and text-to-voice integration
+- Screen reader optimization improvements
+- Keyboard navigation enhancements
+- High contrast and font size customization options
 
-```bash
-npm start
-```
+**3. Advanced AI Features**
+- Multi-language support for global accessibility
+- Industry-specific career guidance
+- Mentorship matching system
+- Skill gap analysis with learning recommendations
+- Career progression prediction models
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+**4. Community Features**
+- Peer support groups for different disabilities
+- Success stories and testimonials section
+- Community-driven job recommendations
+- Accessibility advocacy tools
 
-### Note on frontend environment variables
+**5. Enhanced Responsive Design**
+- Mobile-first approach optimization
+- Progressive Web App (PWA) capabilities
+- Offline functionality for core features
+- Touch-friendly interface improvements
+- Cross-device synchronization
+- Adaptive layouts for tablets and mobile devices
+- Performance optimization for low-bandwidth connections
 
-If you are hosting frontend code somewhere without using DFX, you may need to make one of the following adjustments to ensure your project does not fetch the root key in production:
+---
 
-- set`DFX_NETWORK` to `ic` if you are using Webpack
-- use your own preferred method to replace `process.env.DFX_NETWORK` in the autogenerated declarations
-  - Setting `canisters -> {asset_canister_id} -> declarations -> env_override to a string` in `dfx.json` will replace `process.env.DFX_NETWORK` with the string in the autogenerated declarations
-- Write your own `createActor` constructor
+##  License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+---
+
+## 📞 Support
+For questions, issues, or feedback:
+- Open an issue on GitHub
+- Contact the team through the repository
+
+**Built with ❤️ for accessibility and inclusion by Team Equirk**
