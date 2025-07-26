@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Logo from '../assets/Logo.png';
 import { useAuth } from '../contexts/AuthContext';
+import { useJobRecommendations } from '../contexts/JobRecommendationsContext';
 
 function Course() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, principal, isLoading } = useAuth();
+  const { hasJobRecommendationsData } = useJobRecommendations();
 
-  // Accept job title via state or query param
+  // Accept job title and disabilities via state or query param
   const jobTitle = location.state?.jobTitle || 'Content Writer';
+  const disabilities = location.state?.disabilities || [];
 
   // Track which skill is open per section
   const [openIndexes, setOpenIndexes] = useState({ basic: 0, intermediate: 0, advanced: 0 });
@@ -20,24 +23,25 @@ function Course() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Save roadmap state
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [saveState, setSaveState] = useState('idle'); // idle, saving, saved
-  const [roadmapName, setRoadmapName] = useState('');
-  const [roadmapNotes, setRoadmapNotes] = useState('');
-
   // Section meta info
   const sectionList = [
     { key: 'basic', label: 'Basic', description: 'Learn what content writing is, how to express ideas clearly, and understand basic tools and formats.' },
     { key: 'intermediate', label: 'Intermediate', description: 'Dive into copywriting techniques, adapt tone and format for different platforms, and start building strategy into your writing.' },
-    { key: 'advanced', label: 'Advanced', description: 'Learn how to plan content strategically, write for global audiences, and build a portfolio that helps you land freelance or remote jobs.' }
+    { key: 'advanced', label: 'Advanced', description: 'Learn how to plan content strategically, write for global audiences, and build a portfolio that helps you land freelance or remote jobs.' },
+    ...(disabilities.length > 0 ? [{ key: 'disability', label: 'Accessibility & Inclusion', description: 'Specialized guidance for working in this field with your specific disability considerations and accommodations.' }] : [])
   ];
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    console.log('Fetching roadmap for:', jobTitle);
-    fetch(`/api/roadmap?job=${encodeURIComponent(jobTitle)}`)
+    console.log('Fetching roadmap for:', jobTitle, 'with disabilities:', disabilities);
+    
+    const params = new URLSearchParams({
+      job: jobTitle,
+      ...(disabilities.length > 0 && { disabilities: disabilities.join(',') })
+    });
+    
+    fetch(`/api/roadmap?${params}`)
       .then(res => {
         console.log('Response status:', res.status);
         if (!res.ok) {
@@ -47,6 +51,8 @@ function Course() {
       })
       .then(data => {
         console.log('Roadmap data received:', data);
+        console.log('Disability guidance received:', data.disabilityGuidance);
+        console.log('Disabilities sent:', disabilities);
         setRoadmap(data);
         setLoading(false);
       })
@@ -55,12 +61,7 @@ function Course() {
         setError(e.message);
         setLoading(false);
       });
-  }, [jobTitle]);
-
-  // Set default roadmap name when jobTitle changes
-  useEffect(() => {
-    setRoadmapName(`${jobTitle} Learning Path`);
-  }, [jobTitle]);
+  }, [jobTitle, disabilities]); // Add disabilities to dependency array
 
   const truncatePrincipal = (principal) => {
     if (!principal) return '';
@@ -79,62 +80,11 @@ function Course() {
     setOpenIndexes((prev) => ({ ...prev, [section]: prev[section] === idx ? null : idx }));
   };
 
-  const handleSaveRoadmap = () => {
-    setShowSaveModal(true);
-  };
-
-  const handleSaveConfirm = async () => {
-    setSaveState('saving');
-    
-    try {
-      // Simulate API call - replace with actual save logic later
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const roadmapData = {
-        jobTitle,
-        roadmapName,
-        roadmapNotes,
-        roadmap,
-        savedAt: new Date().toISOString(),
-        principalId: principal
-      };
-      
-      console.log('Saving roadmap:', roadmapData);
-      
-      setSaveState('saved');
-      
-      // Close modal after showing success state
-      setTimeout(() => {
-        setShowSaveModal(false);
-        setSaveState('idle');
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Error saving roadmap:', error);
-      setSaveState('idle');
-    }
-  };
-
-  const handleModalClose = () => {
-    setShowSaveModal(false);
-    setSaveState('idle');
-  };
-
-  const getTotalSkills = () => {
-    if (!roadmap) return 0;
-    return Object.values(roadmap).reduce((total, skills) => {
-      return total + (Array.isArray(skills) ? skills.length : 0);
-    }, 0);
-  };
-
-  const getButtonState = () => {
-    switch (saveState) {
-      case 'saving':
-        return { text: 'Saving...', disabled: true, icon: 'spinner' };
-      case 'saved':
-        return { text: 'Saved ✓', disabled: false, icon: 'check' };
-      default:
-        return { text: 'Save Roadmap', disabled: false, icon: 'bookmark' };
+  const handleBackToJobRecommendations = () => {
+    if (hasJobRecommendationsData()) {
+      navigate('/job-recommendations');
+    } else {
+      navigate('/dashboard');
     }
   };
 
@@ -149,7 +99,6 @@ function Course() {
           <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
           <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
           <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
-          <li><button onClick={() => navigate('/library')} className="hover:text-emerald-700 transition-colors">Library</button></li>
         </ul>
         <div className="flex items-center space-x-4">
           <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
@@ -174,42 +123,20 @@ function Course() {
           {/* Header with Action Bar */}
           <div className="flex justify-between items-start mb-12">
             <div>
+              {/* Back button */}
+              <button 
+                onClick={handleBackToJobRecommendations}
+                className="flex items-center gap-2 text-[#2D6A4F] hover:text-[#22503B] transition-colors mb-4 group"
+              >
+                <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                {hasJobRecommendationsData() ? 'Back to Job Recommendations' : 'Back to Dashboard'}
+              </button>
+              
               <h1 className="text-4xl font-bold text-[#252525] mb-2">{jobTitle} Skill Roadmap</h1>
               <p className="text-gray-600">Your personalized learning path to become a {jobTitle}</p>
             </div>
-            
-            {/* Action buttons */}
-            {!loading && !error && roadmap && (
-              <motion.button 
-                  onClick={handleSaveRoadmap}
-                  disabled={getButtonState().disabled}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl ${
-                    saveState === 'saved' 
-                      ? 'bg-green-600 hover:bg-green-700 text-white' 
-                      : 'bg-gradient-to-r from-[#2D6A4F] to-[#22503B] hover:from-[#285f47] hover:to-[#1e4634] text-white'
-                  } ${getButtonState().disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  whileHover={!getButtonState().disabled ? { scale: 1.02 } : {}}
-                  whileTap={!getButtonState().disabled ? { scale: 0.98 } : {}}
-                >
-                  {getButtonState().icon === 'spinner' && (
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  )}
-                  {getButtonState().icon === 'check' && (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                  {getButtonState().icon === 'bookmark' && (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
-                  )}
-                  {getButtonState().text}
-                </motion.button>
-            )}
           </div>
           
           {/* Main content area */}
@@ -260,6 +187,50 @@ function Course() {
           ) : roadmap ? (
             <div className="flex flex-col gap-16">
               {sectionList.map((section, sIdx) => {
+                // Handle disability section differently - it contains markdown content instead of skills array
+                if (section.key === 'disability') {
+                  return (
+                    <div key={section.key} className="flex gap-16 items-start">
+                      {/* Left column: Section header */}
+                      <div className="w-1/3 flex-shrink-0">
+                        <h2 className="text-xl font-semibold text-[#252525] mb-2">{section.label}</h2>
+                        <p className="text-base text-[#888] max-w-xs">{section.description}</p>
+                      </div>
+                      
+                      {/* Right column: Disability guidance content */}
+                      <div className="flex-1">
+                        {roadmap && roadmap.disabilityGuidance ? (
+                          <div className="prose prose-gray max-w-none">
+                            <div 
+                              className="text-base text-gray-700 leading-relaxed space-y-4 markdown-content"
+                              dangerouslySetInnerHTML={{ 
+                                __html: roadmap.disabilityGuidance
+                                  .replace(/\n\n/g, '</p><p>')
+                                  .replace(/\n/g, '<br />')
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                  .replace(/^(.+)$/gm, '<p>$1</p>')
+                                  .replace(/^#\s+(.+)$/gm, '<h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">$1</h3>')
+                                  .replace(/^##\s+(.+)$/gm, '<h4 class="text-base font-semibold text-gray-800 mt-4 mb-2">$1</h4>')
+                                  .replace(/^-\s+(.+)$/gm, '<li class="ml-4">$1</li>')
+                                  .replace(/(<li.*?>.*?<\/li>)/gs, '<ul class="list-disc pl-5 space-y-1 my-3">$1</ul>')
+                              }} 
+                            />
+                          </div>
+                        ) : !loading && disabilities.length > 0 ? (
+                          <div className="text-gray-500">
+                            <p className="mb-2">Accessibility guidance could not be generated at this time.</p>
+                            <p className="text-sm">Please try refreshing the page or contact support if the issue persists.</p>
+                          </div>
+                        ) : (
+                          <div className="text-gray-500">No specific accessibility guidance available for this job role.</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Handle regular skill sections
                 const skills = Array.isArray(roadmap[section.key]) ? roadmap[section.key] : [];
                 return (
                   <div key={section.key} className="flex gap-16 items-start">
@@ -325,129 +296,6 @@ function Course() {
           </div>
         </div>
       </div>
-
-      {/* Save Roadmap Modal */}
-      <AnimatePresence>
-        {showSaveModal && (
-          <motion.div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleModalClose}
-          >
-            <motion.div 
-              className="bg-white rounded-2xl p-8 max-w-md w-full"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {saveState === 'saved' ? (
-                // Success State
-                <div className="text-center">
-                  <motion.div 
-                    className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  >
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </motion.div>
-                  <h3 className="text-xl font-semibold text-[#252525] mb-2">Roadmap Saved!</h3>
-                  <p className="text-gray-600 mb-4">Your learning path has been saved to your profile</p>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                    <p className="text-sm text-green-800 font-medium">{roadmapName}</p>
-                    <p className="text-xs text-green-600">{getTotalSkills()} skills • 3 sections</p>
-                  </div>
-                </div>
-              ) : (
-                // Save Form State
-                <>
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#81a595] to-[#377056] rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold text-[#252525] mb-2">Save Your Roadmap</h3>
-                    <p className="text-gray-600">Keep track of your learning progress and access it anytime</p>
-                  </div>
-                  
-                  {/* Roadmap Preview */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-[#81a595] to-[#377056] rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xs">
-                          {jobTitle.split(' ').map(word => word[0]).join('').slice(0, 2)}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#252525] text-sm">{jobTitle}</p>
-                        <p className="text-xs text-gray-500">{getTotalSkills()} skills • 3 sections</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Roadmap Name</label>
-                      <input 
-                        type="text" 
-                        value={roadmapName}
-                        onChange={(e) => setRoadmapName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent transition-colors text-[#252525]"
-                        placeholder="Enter roadmap name..."
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Add Notes (Optional)</label>
-                      <textarea 
-                        value={roadmapNotes}
-                        onChange={(e) => setRoadmapNotes(e.target.value)}
-                        placeholder="Add personal notes about your learning goals..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent h-20 resize-none transition-colors text-[#252525]"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={handleModalClose}
-                      disabled={saveState === 'saving'}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[#252525]"
-                    >
-                      Cancel
-                    </button>
-                    <motion.button 
-                      onClick={handleSaveConfirm}
-                      disabled={saveState === 'saving' || !roadmapName.trim()}
-                      className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                        saveState === 'saving' || !roadmapName.trim()
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#2D6A4F] text-white hover:bg-[#22503B]'
-                      }`}
-                      whileHover={saveState !== 'saving' && roadmapName.trim() ? { scale: 1.02 } : {}}
-                      whileTap={saveState !== 'saving' && roadmapName.trim() ? { scale: 0.98 } : {}}
-                    >
-                      {saveState === 'saving' && (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      )}
-                      {saveState === 'saving' ? 'Saving...' : 'Save Roadmap'}
-                    </motion.button>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

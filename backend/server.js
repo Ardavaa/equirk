@@ -92,23 +92,25 @@ app.use((error, req, res, next) => {
 
 // Roadmap generator endpoint
 app.get('/api/roadmap', async (req, res) => {
-  const { job } = req.query;
-  console.log('Roadmap request received for job:', job);
+  const { job, disabilities } = req.query;
+  console.log('Roadmap request received for job:', job, 'with disabilities:', disabilities);
   if (!job) return res.status(400).json({ error: 'Missing job parameter' });
   
   try {
     console.log('Generating roadmap...');
-    const roadmap = await generateRoadmap(job);
+    const roadmap = await generateRoadmap(job, disabilities);
     console.log('Roadmap generated:', roadmap);
+    console.log('DisabilityGuidance in roadmap:', roadmap.disabilityGuidance ? 'Present' : 'Not present');
     
     // Since generateRoadmap now returns arrays directly, just validate they exist and are arrays
     const safe = {
       basic: Array.isArray(roadmap.basic) ? roadmap.basic : [],
       intermediate: Array.isArray(roadmap.intermediate) ? roadmap.intermediate : [],
-      advanced: Array.isArray(roadmap.advanced) ? roadmap.advanced : []
+      advanced: Array.isArray(roadmap.advanced) ? roadmap.advanced : [],
+      ...(roadmap.disabilityGuidance && { disabilityGuidance: roadmap.disabilityGuidance })
     };
     
-    console.log('Safe roadmap:', safe);
+    console.log('Safe roadmap with disability guidance:', safe.disabilityGuidance ? 'Present' : 'Not present');
     res.json(safe);
   } catch (e) {
     console.error('Roadmap generation error:', e);
