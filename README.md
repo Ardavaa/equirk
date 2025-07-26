@@ -90,6 +90,7 @@ cd equirk
 Create `.env` file in the `backend` directory:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
+# or
 GOOGLE_API_KEY=your_gemini_api_key_here
 ```
 
