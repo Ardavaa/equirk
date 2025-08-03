@@ -148,10 +148,10 @@ Backend will run on `http://localhost:3001`
 cd frontend
 npm run dev
 ```
-Frontend will run on `http://localhost:5174`
+Frontend will run on `http://localhost:5173`
 
 **Access the Application:**
-- Frontend: `http://localhost:5174`
+- Frontend: `http://localhost:5173`
 - Node.js Backend: `http://localhost:3001`  
 - Flask ML Service: `http://localhost:5000`
 
