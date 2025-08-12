@@ -146,7 +146,7 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-white">
       <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
-        <img src={Logo} alt="logo" className="w-[9%] h-auto" />
+        <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
         <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
           <li><button onClick={() => handleNavigation('')} className="hover:text-emerald-700 transition-colors">Home</button></li>
           <li><button onClick={() => handleNavigation('about')} className="hover:text-emerald-700 transition-colors">About</button></li>
@@ -185,10 +185,10 @@ function Dashboard() {
 
       <div className="px-20 py-8 pt-28">
         <div className="relative flex justify-between items-start max-w-[1280px] mx-auto">
-          <div className="absolute top-3 h-0.5" style={{ left: '9%', right: '12%', backgroundColor: '#eaf1ee' }}></div>
+          <div  className="absolute top-3 h-0.5 bg-[#eaf1ee] left-[33%] right-[45%] sm:left-[31%] sm:right-[32%] md:left-[3%] md:right-[10%]"></div>
 
           {/* Step Indicators */}
-          <div className="flex flex-col bg-white px-4">
+          <div className="flex flex-col bg-white px-4 pl-10 md:pl-0">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center relative z-10 mb-2 ${step >= 1 ? 'bg-green-700' : 'bg-white border border-gray-300'}`}>
               {step > 1 ? <span className="text-white">✔</span> : <div className="w-3 h-3 bg-white rounded-full"></div>}
             </div>
@@ -212,7 +212,7 @@ function Dashboard() {
 
 
       <div className="flex justify-center px-20 mt-12">
-        <div className="w-[660px] bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="w-[300px] md:w-[660px] bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="p-10">
             {step === 1 && (
               <>
@@ -241,27 +241,41 @@ function Dashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-base font-medium text-custom-dark mb-3">Common Disability Types</label>
-                    <div className="space-y-2">
-                      {[0, 1, 2].map(i => (
-                        <div className="flex gap-2" key={i}>
-                          {disabilityTypes.slice(i * 3, i * 3 + 3).map((disability, index) => (
-                            <button
-                              key={index}
-                              onClick={() => handleDisabilitySelect(disability)}
-                              disabled={selectedDisabilities.includes(disability)}
-                              className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors ${selectedDisabilities.includes(disability)
-                                ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-                                : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
-                                }`}
-                            >
-                              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
-                              </svg>
-                              <span className="text-sm">{disability}</span>
-                            </button>
-                          ))}
-                        </div>
+                    {/* Dropdown for mobile */}
+                    <div className="block sm:hidden mb-4">
+                      <label className="block text-base font-medium text-custom-dark mb-2">Select Disability Type</label>
+                      <select
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700"
+                        value=""
+                        onChange={e => handleDisabilitySelect(e.target.value)}
+                      >
+                        <option value="" disabled>Select...</option>
+                        {disabilityTypes.map((disability, index) => (
+                          <option key={index} value={disability} disabled={selectedDisabilities.includes(disability)}>
+                            {disability}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Buttons for desktop/tablet */}
+                    <div className="hidden sm:flex flex-wrap gap-2 justify-center px-2">
+                      {disabilityTypes.map((disability, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleDisabilitySelect(disability)}
+                          disabled={selectedDisabilities.includes(disability)}
+                          className={`flex items-center gap-2 px-3 py-[6px] border rounded-lg transition-colors w-full sm:w-auto
+                            ${selectedDisabilities.includes(disability)
+                              ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                              : 'bg-gray-50 border-gray-300 hover:bg-gray-100 text-gray-500'
+                            }`}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M7 0.875V13.125M0.875 7H13.125" stroke="#777777" strokeWidth="1.05" strokeLinecap="round" />
+                          </svg>
+                          <span className="text-sm">{disability}</span>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -340,8 +354,8 @@ function Dashboard() {
                 disabled={isGettingManualRecommendations}
                 className={`px-5 py-2 rounded-md shadow transition ${
                   isGettingManualRecommendations 
-                    ? 'bg-gray-400 text-white cursor-not-allowed' 
-                    : 'bg-emerald-800 text-white hover:bg-emerald-700'
+                    ? 'text-[13px] md:text-[15px] bg-gray-400 text-white cursor-not-allowed' 
+                    : 'text-[13px] md:text-[15px] bg-emerald-800 text-white hover:bg-emerald-700'
                 }`}
               >
                 {isGettingManualRecommendations ? (
@@ -363,10 +377,12 @@ function Dashboard() {
 
 
 
-      <div className="border-t border-gray-300 mt-16 px-20 py-6">
-        <div className="max-w-[1280px] mx-auto flex justify-between items-center">
-          <div className="text-base text-gray-500">Equirk © 2025. All rights reserved.</div>
-          <div className="flex gap-5">
+      <div className="border-t border-gray-300 mt-16 px-4 sm:px-8 md:px-20 py-6">
+        <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-base text-gray-500 text-center md:text-left">
+            Equirk © 2025. All rights reserved.
+          </div>
+          <div className="flex flex-col md:flex-row gap-2 md:gap-5 text-center md:text-right">
             <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Terms of Service</span>
             <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Privacy Policy</span>
             <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Cookie Settings</span>

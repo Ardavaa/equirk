@@ -190,7 +190,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
 
   const getFileIcon = () => (
     <svg 
-      className="w-12 h-12 text-[#2D6A4F] mb-4" 
+      className="w-8 h-8 md:w-12 md:h-12 text-[#2D6A4F] mb-4" 
       fill="none" 
       stroke="currentColor" 
       viewBox="0 0 24 24"
@@ -206,7 +206,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
 
   const getCloudIcon = () => (
     <svg 
-      className="w-12 h-12 text-[#2D6A4F] mb-4" 
+      className="w-8 h-8 md:w-12 md:h-12 text-[#2D6A4F] mb-4" 
       fill="none" 
       stroke="currentColor" 
       viewBox="0 0 24 24"
@@ -268,7 +268,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
               </span>
             </p>
             
-            <div className="flex items-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center gap-6 text-[12px] text-gray-500">
               <div className="flex items-center gap-1">
                 {getFileIcon()}
                 <span>PDF files only</span>

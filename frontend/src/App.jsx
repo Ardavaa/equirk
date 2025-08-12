@@ -93,7 +93,8 @@ function MainLanding() {
 
 function App() {
   return (
-    <AuthProvider>
+    <div className='w-full h-full overflow-x-hidden'>
+      <AuthProvider>
       <JobRecommendationsProvider>
         <BrowserRouter>
           <div className='bg-white'>
@@ -119,6 +120,7 @@ function App() {
         </BrowserRouter>
       </JobRecommendationsProvider>
     </AuthProvider>
+    </div>
   )
 }
 

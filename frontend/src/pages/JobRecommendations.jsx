@@ -85,7 +85,7 @@ function JobRecommendations() {
          <div className="min-h-screen bg-white">
        {/* Navigation - Fixed like landing page */}
        <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
-         <img src={Logo} alt="logo" className="w-[9%] h-auto" />
+         <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
                  <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
            <li><button onClick={() => handleNavigation('')} className="hover:text-emerald-700 transition-colors">Home</button></li>
            <li><button onClick={() => handleNavigation('about')} className="hover:text-emerald-700 transition-colors">About</button></li>
@@ -138,64 +138,58 @@ function JobRecommendations() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white border border-[#EAEAEA] rounded-xl p-6"
+                  className="bg-white border border-[#EAEAEA] rounded-xl p-4 sm:p-6"
                 >
-                                                                           <div className="flex gap-4 mb-6">
-                     {/* Circular Logo with Monogram */}
-                     <div className="w-16 h-16 bg-gradient-to-br from-[#81a595] to-[#377056] rounded-full flex items-center justify-center flex-shrink-0">
-                       <span className="text-white font-bold text-lg">
-                         {createMonogram(job.title)}
-                       </span>
-                     </div>
-                     
-                     {/* Job Info */}
-                     <div className="flex-1">
-                                               {/* Job Title */}
-                        <h3 className="text-2xl font-semibold text-[#252525] mb-1">
-                          {job.title || 'Job Title Not Available'}
-                        </h3>
-                       
-                                               {/* Recommendation Ranking */}
-                        <p className="text-gray-600 mb-4">
-                          Recommended Match #{index + 1}
-                        </p>
-                       
-                                                                       {/* Job Description as Bullet Points */}
-                         <div className="space-y-3">
-                           {job.description && (
-                             <div className="flex items-start gap-3">
-                               <span className="text-gray-400 text-sm mt-0.5 flex-shrink-0">•</span>
-                               <p className="text-[#777777] text-sm leading-relaxed flex-1">
-                                 {job.description}
-                               </p>
-                             </div>
-                           )}
-                           {job.skills_desc && (
-                             <div className="flex items-start gap-3">
-                               <span className="text-gray-400 text-sm mt-0.5 flex-shrink-0">•</span>
-                               <p className="text-[#777777] text-sm leading-relaxed flex-1">
-                                 {job.skills_desc}
-                               </p>
-                             </div>
-                           )}
-                         </div>
-                     </div>
-                   </div>
-                   
-                                                                               {/* Bottom Section with Button */}
-                     <div className="border-t border-gray-200 pt-4 flex justify-end">
-                       <button
-                         className="bg-emerald-800 text-white px-6 py-3 rounded-md hover:bg-emerald-700 transition font-medium"
-                         onClick={() => navigate('/course', { 
-                           state: { 
-                             jobTitle: job.title,
-                             disabilities: currentData.disabilities || disabilities
-                           } 
-                         })}
-                       >
-                         View Skills Roadmap
-                       </button>
-                     </div>
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    {/* Circular Logo with Monogram */}
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#81a595] to-[#377056] rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                      <span className="text-white font-bold text-lg">
+                        {createMonogram(job.title)}
+                      </span>
+                    </div>
+                    {/* Job Info */}
+                    <div className="flex-1">
+                      <h3 className="text-lg sm:text-2xl font-semibold text-[#252525] mb-1 text-center sm:text-left">
+                        {job.title || 'Job Title Not Available'}
+                      </h3>
+                      <p className="text-gray-600 mb-4 text-center sm:text-left">
+                        Recommended Match #{index + 1}
+                      </p>
+                      {/* Job Description as Bullet Points */}
+                      <div className="space-y-3">
+                        {job.description && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm mt-0.5 flex-shrink-0">•</span>
+                            <p className="text-[#777777] text-sm leading-relaxed flex-1">
+                              {job.description}
+                            </p>
+                          </div>
+                        )}
+                        {job.skills_desc && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm mt-0.5 flex-shrink-0">•</span>
+                            <p className="text-[#777777] text-sm leading-relaxed flex-1">
+                              {job.skills_desc}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Bottom Section with Button */}
+                  <div className="border-t border-gray-200 pt-4 flex justify-center sm:justify-end">
+                    <button
+                      className="bg-emerald-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-md hover:bg-emerald-700 transition font-medium w-full sm:w-auto"
+                      onClick={() => navigate('/course', { 
+                        state: { 
+                          jobTitle: job.title,
+                          disabilities: currentData.disabilities || disabilities
+                        } 
+                      })}
+                    >
+                      View Skills Roadmap
+                    </button>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -203,14 +197,14 @@ function JobRecommendations() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-[#EAEAEA] rounded-xl p-12 text-center"
+              className="bg-white border border-[#EAEAEA] rounded-xl p-8 sm:p-12 text-center"
             >
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Recommendations Available</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Recommendations Available</h3>
               <p className="text-gray-600 mb-6">
                 We couldn't find job recommendations at the moment. This might be because:
               </p>
@@ -221,7 +215,7 @@ function JobRecommendations() {
               </ul>
               <button 
                 onClick={handleBackToDashboard}
-                className="bg-gradient-to-b from-[#2D6A4F] to-[#24543E] text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-200"
+                className="bg-gradient-to-b from-[#2D6A4F] to-[#24543E] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
               >
                 Try Again
               </button>
@@ -231,16 +225,18 @@ function JobRecommendations() {
       </div>
 
                     {/* Footer */}
-       <div className="border-t border-gray-300 mt-16 px-20 py-6 bg-white">
-         <div className="max-w-[1280px] mx-auto flex justify-between items-center">
-           <div className="text-base text-gray-500">Equirk © 2025. All rights reserved.</div>
-           <div className="flex gap-5">
-             <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Terms of Service</span>
-             <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Privacy Policy</span>
-             <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Cookie Settings</span>
-           </div>
-         </div>
-       </div>
+       <div className="border-t border-gray-300 mt-16 px-4 sm:px-8 md:px-20 py-6">
+        <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-base text-gray-500 text-center md:text-left">
+            Equirk © 2025. All rights reserved.
+          </div>
+          <div className="flex flex-col md:flex-row gap-2 md:gap-5 text-center md:text-right">
+            <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Terms of Service</span>
+            <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Privacy Policy</span>
+            <span className="text-base text-gray-500 cursor-pointer hover:text-gray-700">Cookie Settings</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
