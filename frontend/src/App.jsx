@@ -35,7 +35,8 @@ function MainLanding() {
 
   return (
     <>
-      <AuthStatus />
+    <div className='w-full h-full overflow-x-hidden'>
+            <AuthStatus />
       <Navbar />
       
       {/* Show notification if redirected from protected route */}
@@ -63,13 +64,13 @@ function MainLanding() {
       )}
       
       {/* Add padding-top to account for fixed navbar */}
-      <div id="hero" className='pt-24'>
+      <div id="hero" className='xl:pt-24'>
         <HeroSection />
       </div>
       {/* <div className='my-28'>
         <OrbitAvatars />
       </div> */}
-      <div id="about" className='mt-32'>
+      <div id="about" className='mt-12 '>
         <AboutSection />
       </div>
       <div id="features" className='mt-48'>
@@ -85,6 +86,7 @@ function MainLanding() {
         <CTA/>
       </div>
       <Footer/>
+    </div>
     </>
   );
 }

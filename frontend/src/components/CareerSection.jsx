@@ -173,7 +173,7 @@ const CareerSection = () => {
 
       {/* Title */}
       <motion.h2 
-        className="text-custom-dark text-8xl md:text-3xl font-medium mb-8 max-w-xl mt-2 pb-8"
+        className="text-custom-dark text-3xl md:text-4xl font-medium mb-8 max-w-xl mt-2 pb-8"
         variants={titleVariants}
       >
         Find real job openings from companies that value accessibility and inclusion.

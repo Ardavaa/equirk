@@ -175,7 +175,7 @@ const ContactSection = () => {
   return (
     <motion.div 
       ref={ref}
-      className="mx-16 p-8 px-14 pt-10 bg-gray-50 rounded-2xl font-sans"
+      className="mx-4 md:mx-16 p-8 px-8 md:px-14 pt-10 bg-gray-50 rounded-2xl font-sans"
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={containerVariants}
@@ -191,7 +191,7 @@ const ContactSection = () => {
         {/* Left Side */}
         <motion.div variants={leftSideVariants}>
           <motion.h2 
-            className="text-custom-dark text-3xl font-semibold mb-6 max-w-lg"
+            className="text-custom-dark text-2xl md:text-3xl font-semibold mb-6 max-w-lg"
             variants={headlineVariants}
           >
             If you have any questions or you'd like to find out more about our services, please get in touch.
@@ -209,8 +209,8 @@ const ContactSection = () => {
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
               >
-                <p className="font-medium text-2xl">{detail.title}</p>
-                <p className='text-xl text-gray-400 font-medium'>{detail.info}</p>
+                <p className="font-medium text-lg md:text-2xl">{detail.title}</p>
+                <p className='text-md md:text-xl text-gray-400 font-medium'>{detail.info}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -218,7 +218,7 @@ const ContactSection = () => {
 
         {/* Right Side - Form */}
         <motion.form 
-          className="space-y-4"
+          className="space-y-4 pt- md:pt-0"
           variants={rightSideVariants}
         >
           <motion.div
@@ -227,7 +227,8 @@ const ContactSection = () => {
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
           >
-            <label className="block text-lg mb-1">Full Name</label>
+            <hr className="my-6 border-t-2 border-gray-300 md:hidden" />
+            <label className="block text-lg mb-1 pt-5">Full Name</label>
             <input
               type="text"
               placeholder="Your name"

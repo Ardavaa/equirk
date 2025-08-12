@@ -128,7 +128,7 @@ const FeaturesSection = () => {
   return (
     <motion.div 
       ref={ref}
-      className="p-8 font-sans grid md:grid-cols-2 gap-8 items-start mx-10"
+      className="py-8 pl-8 font-sans grid md:grid-cols-2 gap-8 items-start mx-5 md:mx-10"
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={containerVariants}
@@ -143,7 +143,7 @@ const FeaturesSection = () => {
           Features
         </motion.button>
         <motion.h2 
-          className="text-custom-dark text-8xl md:text-3xl font-medium max-w-[88%] leading-relaxed"
+          className="text-custom-dark text-3xl p md:text-4xl font-medium max-w-[88%] leading-relaxed"
           variants={headlineVariants}
         >
           Everything you need to plan your career with confidence. From job matching to skill-building, all in one place.
@@ -155,7 +155,7 @@ const FeaturesSection = () => {
         {features.map((item, index) => (
           <motion.div 
             key={index} 
-            className="flex items-start gap-4 border-b pb-4"
+            className="flex items-start gap-4 border-b pb-4 pr-10 sm:pr-0"
             custom={index}
             variants={featureItemVariants}
             initial="hidden"
@@ -168,7 +168,7 @@ const FeaturesSection = () => {
             }}
           >
             <motion.p 
-              className="text-6xl font-semibold text-custom-dark"
+              className="text-4xl md:text-6xl font-semibold text-custom-dark"
               custom={index}
               variants={numberVariants}
               initial="hidden"
@@ -178,7 +178,7 @@ const FeaturesSection = () => {
             </motion.p>
             <div>
               <h3 className="text-custom-dark font-semibold text-lg">{item.title}</h3>
-              <p className="pt-2 text-sm text-gray-600">{item.desc}</p>
+              <p className="pt-2 text-[12px] sm:text-sm text-gray-600">{item.desc}</p>
               <hr className="mt-4 my-[-20px] border-gray-300" />
             </div>
           </motion.div>

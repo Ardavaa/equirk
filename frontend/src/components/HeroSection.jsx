@@ -171,15 +171,15 @@ export default function HeroSection() {
   };
 
   return (
-    <motion.section 
-      className="relative overflow-hidden bg-white min-h-[calc(100vh-6rem)]"
+    <motion.section
+      className="relative w-full min-h-screen bg-white overflow-hidden "
       initial="hidden"
       animate="visible"
       variants={getAccessibleVariants(prefersReducedMotion, containerVariants)}
     >
       {/* Elliptical Background Arcs */}
-      <div className="absolute inset-0 flex justify-center items-center">
-        <svg className="w-full h-full max-w-6xl" viewBox="0 0 800 600">
+      <div className="absolute inset-0 w-full h-full">
+        <svg className="w-full h-full" viewBox="0 0 800 600" preserveAspectRatio="none">
           {/* Outer arc */}
           <ellipse
             cx="400"
@@ -231,7 +231,7 @@ export default function HeroSection() {
       </div>
 
       {/* Floating Avatar Circles */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none hidden xl:block">
         {avatars.map((avatar, index) => {
           const position = avatarPositions[index];
           return (
@@ -265,11 +265,11 @@ export default function HeroSection() {
       </div>
 
       {/* Floating Images */}
-      <div className='w-full flex justify-center max-w-none'>
+      <div className='w-full md:pb-20 xl:pb-0 relative hidden md:block'>
         <motion.img
           src={Floating1}
           alt="Roadmap"
-          className="absolute top-0 left-0 w-[400px] h-auto transform translate-x-20 -translate-y-10 drop-shadow-lg z-10"
+          className="absolute top-0 left-0 w-1/2 max-w-md h-auto transform translate-x-8 -translate-y-6 drop-shadow-lg z-10"
           custom="left"
           variants={getAccessibleVariants(prefersReducedMotion, floatingImageVariants)}
           initial="hidden"
@@ -278,7 +278,7 @@ export default function HeroSection() {
         <motion.img
           src={Floating2}
           alt="Job Card"
-          className="absolute top-0 right-0 w-[380px] h-auto transform -translate-x-20 -translate-y-10 drop-shadow-lg z-10"
+          className="absolute top-0 right-0 w-1/2 max-w-md h-auto transform -translate-x-8 -translate-y-6 drop-shadow-lg z-10"
           custom="right"
           variants={getAccessibleVariants(prefersReducedMotion, floatingImageVariants)}
           initial="hidden"
@@ -289,7 +289,7 @@ export default function HeroSection() {
       {/* Text Content */}
       <div className="relative z-20 text-center mt-30 py-32">
         <motion.h1 
-          className="text-5xl sm:text-6xl font-medium text-custom-dark px-4"
+          className="md:text-5xl text-4xl font-medium text-custom-dark px-4"
           variants={getAccessibleVariants(prefersReducedMotion, headlineVariants)}
           initial="hidden"
           animate="visible"
@@ -298,7 +298,7 @@ export default function HeroSection() {
         </motion.h1>
         
         <motion.p 
-          className="mt-4 text-xl text-gray-600"
+          className="mt-4 text-lg md:text-xl text-gray-600"
           variants={getAccessibleVariants(prefersReducedMotion, subtitleVariants)}
           initial="hidden"
           animate="visible"

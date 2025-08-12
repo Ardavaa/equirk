@@ -71,7 +71,7 @@ export default function Navbar() {
           duration: 0.6
         })}
       >
-        <img src={Logo} alt="logo" className="w-[9%] h-auto" />
+        <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
 
         {/* Desktop Navigation */}
         <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
@@ -152,7 +152,7 @@ export default function Navbar() {
           <motion.button
             onClick={handleAuthClick}
             disabled={isLoading}
-            className="bg-gradient-to-b from-[#2D6A4F] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gradient-to-b from-[#2D6A4F] text-[12px] md:text-[16px] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
             whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
             whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
           >
