@@ -1,8 +1,9 @@
 // src/components/Navbar.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
+import LogoutIcon from '../assets/Logout Button.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useReducedMotion, getAccessibleTransition } from '../hooks/useReducedMotion';
 
@@ -10,8 +11,10 @@ export default function Navbar() {
   const { isAuthenticated, principal, login, logout, isLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
   // Track scroll position to add background blur effect
   useEffect(() => {
@@ -24,12 +27,38 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleAuthClick = () => {
     if (isAuthenticated) {
       logout();
     } else {
       login();
     }
+  };
+
+  const handleUserDropdownToggle = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsUserDropdownOpen(false);
+  };
+
+  const handleDashboard = () => {
+    navigate('/dashboard');
+    setIsUserDropdownOpen(false);
   };
 
   const handleNavClick = (sectionId) => {
@@ -118,20 +147,6 @@ export default function Navbar() {
         </ul>
 
         <div className="flex items-center space-x-4">
-          {isAuthenticated && (
-            <motion.div 
-              className="hidden md:flex items-center space-x-2 text-sm text-gray-600"
-              initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={getAccessibleTransition(prefersReducedMotion, { delay: 0.3 })}
-            >
-              <span>Welcome:</span>
-              <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                {truncatePrincipal(principal)}
-              </span>
-            </motion.div>
-          )}
-          
           {/* Mobile Menu Toggle */}
           <motion.button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -149,27 +164,102 @@ export default function Navbar() {
             </svg>
           </motion.button>
           
-          <motion.button
-            onClick={handleAuthClick}
-            disabled={isLoading}
-            className="bg-gradient-to-b from-[#2D6A4F] text-[12px] md:text-[16px] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
-            whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-            whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading...
-              </span>
-            ) : isAuthenticated ? (
-              'Logout'
-            ) : (
-              'Get Started Now'
-            )}
-          </motion.button>
+          {/* Authentication Section */}
+          {isAuthenticated ? (
+            <div className="relative" ref={dropdownRef}>
+              {/* User Dropdown Button */}
+              <motion.button
+                onClick={handleUserDropdownToggle}
+                className="flex items-center space-x-3 bg-transparent hover:bg-gray-50 rounded-lg px-3 py-2 transition-all duration-200 focus:outline-none focus:shadow-md"
+                whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                aria-expanded={isUserDropdownOpen}
+                aria-haspopup="true"
+              >
+                {/* User Avatar */}
+                <img 
+                  src="https://avatar.iran.liara.run/public" 
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+                
+                {/* User Info */}
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-gray-900">
+                    {truncatePrincipal(principal)}
+                  </span>
+                  <span className="text-xs text-gray-500">Internet Identity</span>
+                </div>
+                
+                {/* Dropdown Arrow */}
+                <motion.svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  animate={{ rotate: isUserDropdownOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </motion.svg>
+              </motion.button>
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {isUserDropdownOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-1 w-64 bg-white rounded-lg shadow-lg overflow-hidden z-50"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={getAccessibleTransition(prefersReducedMotion, { duration: 0.2 })}
+                  >
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      <button
+                        onClick={handleDashboard}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                        Dashboard
+                      </button>
+                      
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <img src={LogoutIcon} alt="Logout" className="w-4 h-4 mr-3" />
+                        {isLoading ? 'Signing out...' : 'Logout'}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <motion.button
+              onClick={handleAuthClick}
+              disabled={isLoading}
+              className="bg-gradient-to-b from-[#2D6A4F] text-[12px] md:text-[16px] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                'Get Started Now'
+              )}
+            </motion.button>
+          )}
         </div>
       </motion.nav>
 
@@ -216,13 +306,39 @@ export default function Navbar() {
               </button>
               
               {isAuthenticated && (
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <span>Welcome:</span>
-                    <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                      {truncatePrincipal(principal)}
-                    </span>
-                  </div>
+                <div className="pt-4 border-t border-gray-200 space-y-3">
+                                                  {/* User Info in Mobile */}
+              <div className="flex items-center space-x-3 px-2 py-2 bg-gray-50 rounded-lg">
+                <img 
+                  src="https://avatar.iran.liara.run/public" 
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{truncatePrincipal(principal)}</p>
+                  <p className="text-xs text-gray-500">Internet Identity</p>
+                </div>
+              </div>
+                  
+                  {/* Mobile Menu Actions */}
+                  <button
+                    onClick={handleDashboard}
+                    className="w-full flex items-center px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
+                  >
+                    <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Dashboard
+                  </button>
+                  
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoading}
+                    className="w-full flex items-center px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <img src={LogoutIcon} alt="Logout" className="w-4 h-4 mr-3" />
+                    {isLoading ? 'Signing out...' : 'Logout'}
+                  </button>
                 </div>
               )}
             </div>
