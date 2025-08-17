@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../assets/Logo.png';
+import LogoutIcon from '../assets/Logout Button.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ResumeUpload from './ResumeUpload';
+import { useReducedMotion, getAccessibleTransition } from '../hooks/useReducedMotion';
 
 function Dashboard() {
   const { isAuthenticated, principal, logout, isLoading } = useAuth();
@@ -13,6 +16,9 @@ function Dashboard() {
   const [extractedText, setExtractedText] = useState(''); // New state for extracted text
   const [jobRecommendations, setJobRecommendations] = useState([]);
   const [isGettingManualRecommendations, setIsGettingManualRecommendations] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const dropdownRef = useRef(null);
 
   const getJobRecommendationsFromManualSkills = async (skillsText) => {
     const response = await fetch('http://localhost:5000/recommend-jobs-batch', {
@@ -34,6 +40,18 @@ function Dashboard() {
     return data.recommendations || [];
   }; // New state for job recommendations
   const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
 
 
@@ -60,6 +78,11 @@ function Dashboard() {
 
   const handleLogout = () => {
     logout();
+    setIsUserDropdownOpen(false);
+  };
+
+  const handleUserDropdownToggle = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
   const handleNavigation = (section) => {
@@ -148,38 +171,78 @@ function Dashboard() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
         <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
         <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
-          <li><button onClick={() => handleNavigation('')} className="hover:text-emerald-700 transition-colors">Home</button></li>
-          <li><button onClick={() => handleNavigation('about')} className="hover:text-emerald-700 transition-colors">About</button></li>
-          <li><button onClick={() => handleNavigation('features')} className="hover:text-emerald-700 transition-colors">Features</button></li>
-          <li><button onClick={() => handleNavigation('career')} className="hover:text-emerald-700 transition-colors">Career</button></li>
-          <li><button onClick={() => handleNavigation('contact')} className="hover:text-emerald-700 transition-colors">Contact</button></li>
+          <li><button onClick={() => handleNavigation('')} className="hover:text-[#2d6a4f] transition-colors">Home</button></li>
+          <li><button onClick={() => handleNavigation('about')} className="hover:text-[#2d6a4f] transition-colors">About</button></li>
+          <li><button onClick={() => handleNavigation('features')} className="hover:text-[#2d6a4f] transition-colors">Features</button></li>
+          <li><button onClick={() => handleNavigation('career')} className="hover:text-[#2d6a4f] transition-colors">Career</button></li>
+          <li><button onClick={() => handleNavigation('contact')} className="hover:text-[#2d6a4f] transition-colors">Contact</button></li>
         </ul>
         <div className="flex items-center space-x-4">
           {isAuthenticated && (
-            <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
-              <span>Welcome:</span>
-              <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                {truncatePrincipal(principal)}
-              </span>
+            <div className="relative" ref={dropdownRef}>
+              {/* User Dropdown Button */}
+              <motion.button
+                onClick={handleUserDropdownToggle}
+                className="flex items-center space-x-3 bg-transparent hover:bg-gray-50 rounded-lg px-3 py-2 transition-all duration-200 focus:outline-none focus:shadow-md"
+                whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                aria-expanded={isUserDropdownOpen}
+                aria-haspopup="true"
+              >
+                {/* User Avatar */}
+                <img 
+                  src="https://avatar.iran.liara.run/public" 
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+                
+                {/* User Info */}
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-gray-900">
+                    {truncatePrincipal(principal)}
+                  </span>
+                  <span className="text-xs text-gray-500">Internet Identity</span>
+                </div>
+                
+                {/* Dropdown Arrow */}
+                <motion.svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  animate={{ rotate: isUserDropdownOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </motion.svg>
+              </motion.button>
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {isUserDropdownOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-1 w-64 bg-white rounded-lg shadow-lg overflow-hidden z-50"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={getAccessibleTransition(prefersReducedMotion, { duration: 0.2 })}
+                  >
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <img src={LogoutIcon} alt="Logout" className="w-4 h-4 mr-3" />
+                        {isLoading ? 'Signing out...' : 'Logout'}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
-          <button
-            onClick={handleLogout}
-            disabled={isLoading}
-            className="bg-emerald-800 text-white px-5 py-2 rounded-md shadow hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading...
-              </span>
-            ) : (
-              'Logout'
-            )}
-          </button>
         </div>
       </nav>
 
