@@ -183,9 +183,7 @@ function Dashboard() {
               {/* User Dropdown Button */}
               <motion.button
                 onClick={handleUserDropdownToggle}
-                className="flex items-center space-x-3 bg-transparent hover:bg-gray-50 rounded-lg px-3 py-2 transition-all duration-200 focus:outline-none focus:shadow-md"
-                whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-                whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                className="flex items-center space-x-3 bg-transparent rounded-lg px-3 py-2 focus:outline-none"
                 aria-expanded={isUserDropdownOpen}
                 aria-haspopup="true"
               >
