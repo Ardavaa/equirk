@@ -1,11 +1,40 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import Logo from '../assets/Logo.png';
 import LogoutIcon from '../assets/Logout Button.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useJobRecommendations } from '../contexts/JobRecommendationsContext';
 import { useReducedMotion, getAccessibleTransition } from '../hooks/useReducedMotion';
+
+// Simple Error Boundary for ReactMarkdown
+class MarkdownErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('MarkdownErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {this.props.fallbackContent || 'Error rendering markdown content'}
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 function JobRecommendations() {
   const location = useLocation();
@@ -15,6 +44,13 @@ function JobRecommendations() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const dropdownRef = useRef(null);
+  
+  // Roadmap state
+  const [selectedJobForRoadmap, setSelectedJobForRoadmap] = useState(null);
+  const [roadmap, setRoadmap] = useState(null);
+  const [roadmapLoading, setRoadmapLoading] = useState(false);
+  const [roadmapError, setRoadmapError] = useState(null);
+  const [openIndexes, setOpenIndexes] = useState({ basic: 0, intermediate: 0, advanced: 0 });
   
   // Get data from navigation state or context
   const stateData = location.state || {};
@@ -65,12 +101,55 @@ function JobRecommendations() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleBackToDashboard = () => {
-    navigate('/dashboard');
+  const handleBackToCareerInsights = () => {
+    navigate('/career-insights');
   };
 
   const handleNavigation = (section) => {
     navigate(`/#${section}`);
+  };
+
+  // Roadmap functions
+  const handleViewRoadmap = async (job) => {
+    // Scroll to top before showing roadmap
+    window.scrollTo(0, 0);
+    
+    setSelectedJobForRoadmap(job);
+    setRoadmapLoading(true);
+    setRoadmapError(null);
+    
+    console.log('Fetching roadmap for:', job.title, 'with disabilities:', currentData.disabilities || disabilities);
+    
+    const params = new URLSearchParams({
+      job: job.title,
+      ...(currentData.disabilities?.length > 0 && { disabilities: currentData.disabilities.join(',') })
+    });
+    
+    try {
+      const response = await fetch(`/api/roadmap?${params}`);
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log('Roadmap data received:', data);
+      setRoadmap(data);
+    } catch (error) {
+      console.error('Fetch error:', error);
+      setRoadmapError(error.message);
+    } finally {
+      setRoadmapLoading(false);
+    }
+  };
+
+  const handleCloseRoadmap = () => {
+    setSelectedJobForRoadmap(null);
+    setRoadmap(null);
+    setRoadmapError(null);
+  };
+
+  const handleAccordion = (section, idx) => {
+    setOpenIndexes((prev) => ({ ...prev, [section]: prev[section] === idx ? null : idx }));
   };
 
   // Scroll to top when component mounts
@@ -108,12 +187,17 @@ function JobRecommendations() {
        {/* Navigation - Fixed like landing page */}
        <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
          <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
-                 <ul className="hidden md:flex space-x-6 text-gray-700 font-normal text-lg">
-           <li><button onClick={() => handleNavigation('')} className="hover:text-[#2d6a4f] transition-colors">Home</button></li>
-           <li><button onClick={() => handleNavigation('about')} className="hover:text-[#2d6a4f] transition-colors">About</button></li>
-           <li><button onClick={() => handleNavigation('features')} className="hover:text-[#2d6a4f] transition-colors">Features</button></li>
-           <li><button onClick={() => handleNavigation('career')} className="hover:text-[#2d6a4f] transition-colors">Career</button></li>
-           <li><button onClick={() => handleNavigation('contact')} className="hover:text-[#2d6a4f] transition-colors">Contact</button></li>
+                 <ul className="hidden md:flex space-x-8 font-normal text-lg">
+          <li>
+            <span className="text-[#2D6A4F] transition-colors cursor-pointer">
+              Career Insights
+            </span>
+          </li>
+          <li>
+            <span className="text-[#767676] transition-colors cursor-pointer">
+              Matches & Roadmaps
+            </span>
+          </li>
          </ul>
         <div className="flex items-center space-x-4">
           <div className="relative" ref={dropdownRef}>
@@ -165,13 +249,13 @@ function JobRecommendations() {
                   {/* Menu Items */}
                   <div className="py-2">
                     <button
-                      onClick={handleBackToDashboard}
+                      onClick={handleBackToCareerInsights}
                       className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                     >
                       <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 0 01-2-2v-2z" />
                       </svg>
-                      Dashboard
+                      Career Insights
                     </button>
                     
                     <button
@@ -193,21 +277,175 @@ function JobRecommendations() {
              {/* Main Content - Following Figma Design */}
        <div className="px-20 py-10 pt-28">
         <div className="max-w-[1280px] mx-auto">
-                     {/* Header Section */}
-           <div className="mb-10">
-              <h1 className="text-4xl font-bold text-[#252525] mb-5">
-                Your Career Matches
-              </h1>
-              <p className="text-xl text-[#777777]">
-                 These career suggestions are based on your previous inputs. Not quite right?{' '}
-                 <button 
-                    onClick={handleBackToDashboard}
-                    className="text-[#2D6A4F] underline hover:text-[#1B4332] transition-colors duration-300"
+          {selectedJobForRoadmap ? (
+            /* Roadmap View */
+            <>
+              {/* Roadmap Header */}
+              <div className="flex justify-between items-start mb-12">
+                <div>
+                  <button 
+                    onClick={handleCloseRoadmap}
+                    className="flex items-center gap-2 text-[#2D6A4F] hover:text-[#22503B] transition-colors mb-4 group"
                   >
-                    Go back to update your profile
+                    <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Job Recommendations
                   </button>
-               </p>
-            </div>
+                  
+                  <h1 className="text-4xl font-bold text-[#252525] mb-2">{selectedJobForRoadmap.title} Skill Roadmap</h1>
+                  <p className="text-gray-600">Your personalized learning path to become a {selectedJobForRoadmap.title}</p>
+                </div>
+              </div>
+              
+              {/* Roadmap Content */}
+              <div className="min-h-[600px]">
+                {roadmapLoading ? (
+                  <div className="flex flex-col gap-16">
+                    {/* Loading skeleton */}
+                    {[1, 2, 3].map((idx) => (
+                      <div key={idx} className="flex gap-16 items-start">
+                        <div className="w-1/3 flex-shrink-0">
+                          <div className="h-6 bg-gray-200 rounded-md mb-2 w-24 animate-pulse"></div>
+                          <div className="space-y-2">
+                            <div className="h-4 bg-gray-200 rounded-md w-full animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded-md w-3/4 animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex flex-col gap-3">
+                            {[1, 2, 3].map((skillIdx) => (
+                              <div key={skillIdx} className="flex items-center py-4 border-b border-gray-100">
+                                <div className="w-10 h-10 rounded-full bg-gray-200 mr-5 animate-pulse"></div>
+                                <div className="flex-1">
+                                  <div className="h-5 bg-gray-200 rounded-md w-3/4 animate-pulse"></div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="flex items-center justify-center py-8">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#2D6A4F]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-lg text-gray-500">Loading roadmap...</span>
+                    </div>
+                  </div>
+                ) : roadmapError ? (
+                  <div className="text-red-500 text-center py-8">
+                    <p className="mb-4">Error loading roadmap: {roadmapError}</p>
+                    <button 
+                      onClick={() => handleViewRoadmap(selectedJobForRoadmap)}
+                      className="bg-[#2D6A4F] text-white px-4 py-2 rounded-md hover:bg-[#22503B] transition"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : roadmap ? (
+                  <div className="flex flex-col gap-16">
+                    {[
+                      { key: 'basic', label: 'Basic', description: 'Learn fundamental concepts and basic tools.' },
+                      { key: 'intermediate', label: 'Intermediate', description: 'Dive deeper into techniques and build practical skills.' },
+                      { key: 'advanced', label: 'Advanced', description: 'Master advanced concepts and build professional expertise.' },
+                      ...((currentData.disabilities || disabilities).length > 0 ? [{ key: 'disability', label: 'Accessibility & Inclusion', description: 'Specialized guidance for working in this field with your specific disability considerations and accommodations.' }] : [])
+                    ].map((section) => {
+                      // Handle disability section differently
+                      if (section.key === 'disability') {
+                        return (
+                          <div key={section.key} className="flex gap-16 items-start">
+                            <div className="w-1/3 flex-shrink-0">
+                              <h2 className="text-xl font-semibold text-[#252525] mb-2">{section.label}</h2>
+                              <p className="text-base text-[#888] max-w-xs">{section.description}</p>
+                            </div>
+                            
+                            <div className="flex-1">
+                              {roadmap && roadmap.disabilityGuidance ? (
+                                <div className="prose prose-gray max-w-none">
+                                  <MarkdownErrorBoundary fallbackContent={String(roadmap.disabilityGuidance)}>
+                                    <ReactMarkdown className="markdown-content">
+                                      {String(roadmap.disabilityGuidance)}
+                                    </ReactMarkdown>
+                                  </MarkdownErrorBoundary>
+                                </div>
+                              ) : (
+                                <div className="text-gray-500">No specific accessibility guidance available for this job role.</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Handle regular skill sections
+                      const skills = Array.isArray(roadmap[section.key]) ? roadmap[section.key] : [];
+                      return (
+                        <div key={section.key} className="flex gap-16 items-start">
+                          <div className="w-1/3 flex-shrink-0">
+                            <h2 className="text-xl font-semibold text-[#252525] mb-2">{section.label}</h2>
+                            <p className="text-base text-[#888] max-w-xs">{section.description}</p>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="flex flex-col gap-3">
+                              {skills.map((skill, idx) => (
+                                <div key={skill.title || idx}>
+                                  <button
+                                    className={`w-full flex items-center text-left px-0 py-4 border-b border-gray-100 focus:outline-none transition group ${openIndexes[section.key] === idx ? 'bg-gray-50' : ''}`}
+                                    onClick={() => handleAccordion(section.key, idx)}
+                                  >
+                                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#eaf1ee] text-emerald-800 font-bold text-lg mr-5 border border-[#eaf1ee]">
+                                      {String(idx + 1).padStart(2, '0')}
+                                    </span>
+                                    <span className="text-lg font-medium text-[#252525]">{skill.title}</span>
+                                    <span className={`ml-auto transition-transform ${openIndexes[section.key] === idx ? 'rotate-180' : ''}`}>
+                                      <svg width="20" height="20" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                                    </span>
+                                  </button>
+                                  {openIndexes[section.key] === idx && (
+                                    <div className="pl-16 pb-4">
+                                      {skill.description && (
+                                        <p className="text-[#888] text-base mb-2">{skill.description}</p>
+                                      )}
+                                      {skill.resources && (
+                                        <a href="#" className="text-emerald-800 font-medium flex items-center gap-1 hover:underline">
+                                          {skill.resources}
+                                          <svg width="16" height="16" fill="none" stroke="#377056" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                        </a>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            /* Job Recommendations View */
+            <>
+              {/* Header Section */}
+              <div className="mb-10">
+                 <h1 className="text-4xl font-bold text-[#252525] mb-5">
+                   Your Career Matches
+                 </h1>
+                 <p className="text-xl text-[#777777]">
+                    These career suggestions are based on your previous inputs. Not quite right?{' '}
+                    <button 
+                       onClick={handleBackToCareerInsights}
+                       className="text-[#2D6A4F] underline hover:text-[#1B4332] transition-colors duration-300"
+                     >
+                       Go back to update your profile
+                     </button>
+                  </p>
+               </div>
 
           {/* Job Cards */}
           {currentData.jobRecommendations && currentData.jobRecommendations.length > 0 ? (
@@ -260,14 +498,20 @@ function JobRecommendations() {
                   <div className="border-t border-gray-200 pt-4 flex justify-center sm:justify-end">
                     <button
                       className="bg-emerald-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-md hover:bg-emerald-700 transition font-medium w-full sm:w-auto"
-                      onClick={() => navigate('/course', { 
-                        state: { 
-                          jobTitle: job.title,
-                          disabilities: currentData.disabilities || disabilities
-                        } 
-                      })}
+                      onClick={() => handleViewRoadmap(job)}
+                      disabled={roadmapLoading}
                     >
-                      View Skills Roadmap
+                      {roadmapLoading && selectedJobForRoadmap?.title === job.title ? (
+                        <span className="flex items-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Loading Roadmap...
+                        </span>
+                      ) : (
+                        'View Skills Roadmap'
+                      )}
                     </button>
                   </div>
                 </motion.div>
@@ -294,12 +538,14 @@ function JobRecommendations() {
                 <li>• No matching jobs were found in our database</li>
               </ul>
               <button 
-                onClick={handleBackToDashboard}
+                onClick={handleBackToCareerInsights}
                 className="bg-gradient-to-b from-[#2D6A4F] to-[#24543E] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
               >
                 Try Again
               </button>
             </motion.div>
+          )}
+            </>
           )}
         </div>
       </div>
