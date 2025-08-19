@@ -12,9 +12,8 @@ import CareerSection from './components/CareerSection';
 import { AuthProvider } from './contexts/AuthContext';
 import { JobRecommendationsProvider } from './contexts/JobRecommendationsContext';
 import AuthStatus from './components/AuthStatus';
-import Dashboard from './components/Dashboard';
+import CareerInsights from './components/CareerInsights';
 import JobRecommendations from './pages/JobRecommendations';
-import Course from './pages/Course';
 import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -100,19 +99,14 @@ function App() {
           <div className='bg-white'>
             <Routes>
               <Route path="/" element={<MainLanding />} />
-              <Route path="/dashboard" element={
+              <Route path="/career-insights" element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <CareerInsights />
                 </ProtectedRoute>
               } />
               <Route path="/job-recommendations" element={
                 <ProtectedRoute>
                   <JobRecommendations />
-                </ProtectedRoute>
-              } />
-              <Route path="/course" element={
-                <ProtectedRoute>
-                  <Course />
                 </ProtectedRoute>
               } />
             </Routes>
