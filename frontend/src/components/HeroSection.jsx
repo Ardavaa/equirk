@@ -164,7 +164,7 @@ export default function HeroSection() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/career-insights');
     } else {
       login();
     }
@@ -325,7 +325,7 @@ export default function HeroSection() {
               Loading...
             </span>
           ) : isAuthenticated ? (
-            'Go to Dashboard'
+            'Go to Career Insights'
           ) : (
             'Get Started Now'
           )}
