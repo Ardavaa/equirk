@@ -105,6 +105,10 @@ function JobRecommendations() {
     navigate('/career-insights');
   };
 
+  const handleMatchesRoadmaps = () => {
+    navigate('/matches-roadmaps');
+  };
+
   const handleNavigation = (section) => {
     navigate(`/#${section}`);
   };
@@ -189,14 +193,20 @@ function JobRecommendations() {
          <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
                  <ul className="hidden md:flex space-x-8 font-normal text-lg">
           <li>
-            <span className="text-[#2D6A4F] transition-colors cursor-pointer">
+            <button 
+              onClick={handleBackToCareerInsights}
+              className="text-[#2D6A4F] transition-colors cursor-pointer"
+            >
               Career Insights
-            </span>
+            </button>
           </li>
           <li>
-            <span className="text-[#767676] transition-colors cursor-pointer">
+            <button 
+              onClick={handleMatchesRoadmaps}
+              className="text-[#767676] hover:text-[#2D6A4F] transition-colors cursor-pointer"
+            >
               Matches & Roadmaps
-            </span>
+            </button>
           </li>
          </ul>
         <div className="flex items-center space-x-4">

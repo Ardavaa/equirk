@@ -14,6 +14,7 @@ import { JobRecommendationsProvider } from './contexts/JobRecommendationsContext
 import AuthStatus from './components/AuthStatus';
 import CareerInsights from './components/CareerInsights';
 import JobRecommendations from './pages/JobRecommendations';
+import MatchesRoadmaps from './pages/MatchesRoadmaps';
 import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -107,6 +108,11 @@ function App() {
               <Route path="/job-recommendations" element={
                 <ProtectedRoute>
                   <JobRecommendations />
+                </ProtectedRoute>
+              } />
+              <Route path="/matches-roadmaps" element={
+                <ProtectedRoute>
+                  <MatchesRoadmaps />
                 </ProtectedRoute>
               } />
             </Routes>

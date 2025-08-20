@@ -89,6 +89,10 @@ function CareerInsights() {
     navigate(`/#${section}`);
   };
 
+  const handleMatchesRoadmaps = () => {
+    navigate('/matches-roadmaps');
+  };
+
   const handleNext = async () => {
     if (step < 2) {
       setStep(step + 1);
@@ -176,11 +180,14 @@ function CareerInsights() {
               Career Insights
             </span>
           </li>
-          <li>
-            <span className="text-[#767676] transition-colors cursor-pointer">
-              Matches & Roadmaps
-            </span>
-          </li>
+                      <li>
+              <button 
+                onClick={handleMatchesRoadmaps}
+                className="text-[#767676] hover:text-[#2D6A4F] transition-colors cursor-pointer"
+              >
+                Matches & Roadmaps
+              </button>
+            </li>
         </ul>
         <div className="flex items-center space-x-4">
           {isAuthenticated && (
