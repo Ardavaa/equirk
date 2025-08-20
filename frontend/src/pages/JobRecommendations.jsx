@@ -216,21 +216,21 @@ function JobRecommendations() {
              {/* Center Navigation */}
              <div className="hidden md:block">
                <div className="flex space-x-8">
-                 <button 
-                   onClick={handleBackToCareerInsights}
-                   className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
-                 >
-                   Career Insights
-                 </button>
                  <div className="relative flex items-center h-20">
                    <button 
-                     onClick={handleMatchesRoadmaps}
+                     onClick={handleBackToCareerInsights}
                      className="text-[#2D6A4F] font-medium text-lg cursor-pointer"
                    >
-                     Matches & Roadmaps
+                     Career Insights
                    </button>
                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D6A4F]"></div>
                  </div>
+                 <button 
+                   onClick={handleMatchesRoadmaps}
+                   className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                 >
+                   Matches & Roadmaps
+                 </button>
                </div>
              </div>
              

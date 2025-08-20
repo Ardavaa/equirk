@@ -85,55 +85,65 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-gray-200 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg' 
-          : 'bg-white shadow-sm'
-      }`}>
+      <motion.nav 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled 
+            ? 'bg-white/95 backdrop-blur-md shadow-lg' 
+            : 'bg-white shadow-sm'
+        } border-b border-gray-200`}
+        initial={{ y: prefersReducedMotion ? 0 : -100 }}
+        animate={{ y: 0 }}
+        transition={getAccessibleTransition(prefersReducedMotion, {
+          type: "spring", 
+          stiffness: 100, 
+          damping: 20,
+          duration: 0.6
+        })}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
               <img src={Logo} alt="logo" className="h-8 w-auto" />
             </div>
-            
-            {/* Center Navigation */}
+
+            {/* Desktop Navigation */}
             <div className="hidden md:block">
               <div className="flex space-x-8">
                 <button 
                   onClick={() => handleNavClick('hero')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Home
                 </button>
                 <button 
                   onClick={() => handleNavClick('about')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   About
                 </button>
                 <button 
                   onClick={() => handleNavClick('features')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Features
                 </button>
                 <button 
                   onClick={() => handleNavClick('career')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Career
                 </button>
                 <button 
                   onClick={() => handleNavClick('contact')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Contact
                 </button>
               </div>
             </div>
-            
-            {/* Right Side - Mobile Menu Toggle + Auth */}
+
+            {/* User Profile / Auth Section */}
             <div className="flex items-center space-x-4">
               {/* Mobile Menu Toggle */}
               <motion.button
@@ -151,108 +161,108 @@ export default function Navbar() {
                   />
                 </svg>
               </motion.button>
-              
-              {/* Authentication Section */}
-              {isAuthenticated ? (
-                <div className="relative" ref={dropdownRef}>
-                  {/* User Dropdown Button */}
-                  <motion.button
-                    onClick={handleUserDropdownToggle}
-                    className="flex items-center space-x-3 bg-transparent rounded-lg px-3 py-2 focus:outline-none"
-                    aria-expanded={isUserDropdownOpen}
-                    aria-haspopup="true"
-                  >
-                    {/* User Avatar */}
-                    <img 
-                      src="https://avatar.iran.liara.run/public" 
-                      alt="User Avatar"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    
-                    {/* User Info */}
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium text-gray-900">
-                        {truncatePrincipal(principal)}
-                      </span>
-                      <span className="text-xs text-gray-500">Internet Identity</span>
-                    </div>
-                    
-                    {/* Dropdown Arrow */}
-                    <motion.svg
-                      className="w-4 h-4 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      animate={{ rotate: isUserDropdownOpen ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </motion.svg>
-                  </motion.button>
-
-                  {/* Dropdown Menu */}
-                  <AnimatePresence>
-                    {isUserDropdownOpen && (
-                      <motion.div
-                        className="absolute right-0 mt-1 w-64 bg-white rounded-lg shadow-lg overflow-hidden z-50"
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        transition={getAccessibleTransition(prefersReducedMotion, { duration: 0.2 })}
-                      >
-                        {/* Menu Items */}
-                        <div className="py-2">
-                          <button
-                            onClick={handleCareerInsights}
-                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                          >
-                            <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                            </svg>
-                            Career Insights
-                          </button>
-                          
-                          <button
-                            onClick={handleLogout}
-                            disabled={isLoading}
-                            className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <img src={LogoutIcon} alt="Logout" className="w-4 h-4 mr-3" />
-                            {isLoading ? 'Signing out...' : 'Logout'}
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+          
+          {/* Authentication Section */}
+          {isAuthenticated ? (
+            <div className="relative" ref={dropdownRef}>
+              {/* User Dropdown Button */}
+              <motion.button
+                onClick={handleUserDropdownToggle}
+                className="flex items-center space-x-3 bg-transparent rounded-lg px-3 py-2 focus:outline-none"
+                aria-expanded={isUserDropdownOpen}
+                aria-haspopup="true"
+              >
+                {/* User Avatar */}
+                <img 
+                  src="https://avatar.iran.liara.run/public" 
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+                
+                {/* User Info */}
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-gray-900">
+                    {truncatePrincipal(principal)}
+                  </span>
+                  <span className="text-xs text-gray-500">Internet Identity</span>
                 </div>
-              ) : (
-                <motion.button
-                  onClick={handleAuthClick}
-                  disabled={isLoading}
-                  className="bg-gradient-to-b from-[#2D6A4F] text-[12px] md:text-[16px] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-                  whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                
+                {/* Dropdown Arrow */}
+                <motion.svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  animate={{ rotate: isUserDropdownOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Loading...
-                    </span>
-                  ) : (
-                    'Get Started Now'
-                  )}
-                </motion.button>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </motion.svg>
+              </motion.button>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {isUserDropdownOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-1 w-64 bg-white rounded-lg shadow-lg overflow-hidden z-50"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={getAccessibleTransition(prefersReducedMotion, { duration: 0.2 })}
+                  >
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      <button
+                        onClick={handleCareerInsights}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                        Career Insights
+                      </button>
+                      
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <img src={LogoutIcon} alt="Logout" className="w-4 h-4 mr-3" />
+                        {isLoading ? 'Signing out...' : 'Logout'}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <motion.button
+              onClick={handleAuthClick}
+              disabled={isLoading}
+              className="bg-gradient-to-b from-[#2D6A4F] text-[12px] md:text-[16px] to-[#22503B] text-white px-5 py-2 rounded-md shadow hover:from-[#285f47] hover:to-[#1e4634] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                'Get Started Now'
+              )}
+            </motion.button>
+          )}
+        </div>
+      </div>
+    </div>
+  </motion.nav>
+
+    {/* Mobile Menu */}
+    <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             className="fixed top-[80px] left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200"
@@ -295,18 +305,18 @@ export default function Navbar() {
               
               {isAuthenticated && (
                 <div className="pt-4 border-t border-gray-200 space-y-3">
-                  {/* User Info in Mobile */}
-                  <div className="flex items-center space-x-3 px-2 py-2 bg-gray-50 rounded-lg">
-                    <img 
-                      src="https://avatar.iran.liara.run/public" 
-                      alt="User Avatar"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{truncatePrincipal(principal)}</p>
-                      <p className="text-xs text-gray-500">Internet Identity</p>
-                    </div>
-                  </div>
+                                                  {/* User Info in Mobile */}
+              <div className="flex items-center space-x-3 px-2 py-2 bg-gray-50 rounded-lg">
+                <img 
+                  src="https://avatar.iran.liara.run/public" 
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{truncatePrincipal(principal)}</p>
+                  <p className="text-xs text-gray-500">Internet Identity</p>
+                </div>
+              </div>
                   
                   {/* Mobile Menu Actions */}
                   <button
