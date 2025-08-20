@@ -224,154 +224,188 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
 
   return (
     <div className={`w-full ${className}`}>
-      {!selectedFile ? (
-        <div
-          className={`
-            relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer
-            ${isDragActive 
-              ? 'border-[#2D6A4F] bg-gradient-to-br from-green-50 to-emerald-50 scale-105' 
-              : 'border-gray-300 bg-white hover:border-[#2D6A4F] hover:bg-gradient-to-br hover:from-green-50 hover:to-emerald-50'
-            }
-            ${error ? 'border-red-300 bg-red-50' : ''}
-          `}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={handleBrowseFiles}
-        >
-          {/* Hidden file input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept=".pdf"
-            onChange={handleFileSelect}
-          />
-
-          {/* Upload Icon */}
-          <motion.div
-            animate={isDragActive ? { scale: 1.1 } : { scale: 1 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col items-center"
+      <div className="space-y-4">
+        {/* Upload Area */}
+        {!selectedFile || uploadProgress < 100 ? (
+          <div
+            className={`
+              relative border-2 border-dashed border-gray-300 rounded-lg p-12 text-center transition-all duration-200 cursor-pointer bg-white
+              ${isDragActive 
+                ? 'border-[#2D6A4F] bg-green-50' 
+                : 'hover:border-[#2D6A4F] hover:bg-green-50'
+              }
+              ${error ? 'border-red-300 bg-red-50' : ''}
+            `}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onClick={!selectedFile ? handleBrowseFiles : undefined}
           >
-            {getCloudIcon()}
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf"
+              onChange={handleFileSelect}
+            />
+
+            {/* Upload states */}
+            {!selectedFile ? (
+              /* Initial Upload State */
+              <motion.div
+                animate={isDragActive ? { scale: 1.05 } : { scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col items-center"
+              >
+                {/* Cloud Icon */}
+                <svg className="w-12 h-12 text-[#2D6A4F] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+                
+                <h3 className="text-lg font-medium text-gray-700 mb-2">
+                  Drag your file to start uploading
+                </h3>
+                
+                <p className="text-gray-500 mb-6">OR</p>
+                
+                <button
+                  type="button"
+                  className="px-6 py-2 border border-[#2D6A4F] text-[#2D6A4F] rounded-lg hover:bg-green-50 transition-colors font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBrowseFiles();
+                  }}
+                >
+                  Browse file
+                </button>
+              </motion.div>
+            ) : uploadProgress > 0 && uploadProgress < 100 ? (
+              /* Upload Progress State */
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center"
+              >
+                {/* Circular Progress */}
+                <div className="relative w-16 h-16 mb-4">
+                  <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke="#e5e7eb"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke="#2D6A4F"
+                      strokeWidth="4"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 28}`}
+                      strokeDashoffset={`${2 * Math.PI * 28 * (1 - uploadProgress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-300"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-sm font-medium text-[#2D6A4F]">{uploadProgress}%</span>
+                  </div>
+                </div>
+                
+                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  Uploading ...
+                </h3>
+                
+                <button
+                  type="button"
+                  className="px-6 py-2 border border-[#2D6A4F] text-[#2D6A4F] rounded-lg hover:bg-green-50 transition-colors font-medium"
+                  onClick={handleRemoveFile}
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            ) : null}
+
+            {/* Error message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          /* File Uploaded Successfully State */
+          <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-white">
+            {/* Cloud Icon */}
+            <svg className="w-12 h-12 text-[#2D6A4F] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            </svg>
             
-            <h3 className="text-xl font-medium text-custom-dark mb-2">
-              Drag & drop your resume
+            <h3 className="text-lg font-medium text-gray-700 mb-2">
+              Drag your file to start uploading
             </h3>
             
-            <p className="text-gray-600 mb-4">
-              or{' '}
-              <span className="text-[#2D6A4F] font-medium hover:underline">
-                browse files
-              </span>
-            </p>
+            <p className="text-gray-500 mb-6">OR</p>
             
-            <div className="flex items-center gap-6 text-[12px] text-gray-500">
-              <div className="flex items-center gap-1">
-                {getFileIcon()}
-                <span>PDF files only</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10M7 4v16a1 1 0 001 1h8a1 1 0 001 1V4M7 4H5a1 1 0 00-1 1v16a1 1 0 001 1h2" />
-                </svg>
-                <span>Max 10MB</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Error message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm"
+            <button
+              type="button"
+              className="px-6 py-2 border border-[#2D6A4F] text-[#2D6A4F] rounded-lg hover:bg-green-50 transition-colors font-medium"
+              onClick={handleBrowseFiles}
             >
-              {error}
-            </motion.div>
-          )}
-        </div>
-      ) : (
-        /* File Selected State */
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="border-2 border-[#2D6A4F] bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
+              Browse file
+            </button>
+          </div>
+        )}
+
+        {/* File size info */}
+        <p className="text-center text-sm text-gray-500">
+          Only support .pdf file up to 10MB
+        </p>
+
+        {/* Uploaded file details */}
+        {selectedFile && uploadProgress === 100 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
+          >
             <div className="flex items-center gap-3">
-              {getFileIcon()}
+              {/* PDF Icon */}
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img src="/src/assets/PDF Logo.png" alt="PDF" className="w-10 h-10" />
+              </div>
               <div>
-                <h4 className="font-medium text-custom-dark">{selectedFile.name}</h4>
-                <p className="text-sm text-gray-600">
-                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-                </p>
+                <h4 className="font-medium text-gray-900">User-Resume.pdf</h4>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span>{(selectedFile.size / 1024).toFixed(0)} KB</span>
+                  <span>•</span>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Completed</span>
+                  </div>
+                </div>
               </div>
             </div>
             <button
               onClick={handleRemoveFile}
-              className="p-2 text-[#2D6A4F] hover:text-[#22503B] hover:bg-green-100 rounded-lg transition"
+              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
-          </div>
-
-          {/* Progress Bar */}
-          {uploadProgress > 0 && uploadProgress < 100 && (
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">
-                  {isGettingRecommendations 
-                    ? 'Getting job recommendations...' 
-                    : isExtracting 
-                      ? 'Extracting text from PDF...' 
-                      : 'Processing PDF...'
-                  }
-                </span>
-                <span className="text-sm text-[#2D6A4F] font-medium">{uploadProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <motion.div
-                  className="h-2 bg-gradient-to-r from-[#2D6A4F] to-[#22503B] rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${uploadProgress}%` }}
-                  transition={{ duration: 0.1 }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Success State */}
-          {uploadProgress === 100 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-2"
-            >
-              <div className="flex items-center gap-2 text-[#2D6A4F] text-sm font-medium">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                PDF processed successfully!
-              </div>
-              {extractedText && (
-                <div className="text-xs text-gray-600">
-                  Extracted {extractedText.length} characters from PDF
-                </div>
-              )}
-              {jobRecommendations.length > 0 && (
-                <div className="text-xs text-[#2D6A4F] mt-1">
-                  ✨ Found {jobRecommendations.length} job recommendations
-                </div>
-              )}
-            </motion.div>
-          )}
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };

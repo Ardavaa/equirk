@@ -107,11 +107,11 @@ function CareerInsights() {
         try {
           setIsGettingManualRecommendations(true);
           console.log('Getting job recommendations for manual skills:', skillsText);
-          
+
           const manualRecommendations = await getJobRecommendationsFromManualSkills(skillsText);
           finalJobRecommendations = manualRecommendations;
           setJobRecommendations(manualRecommendations);
-          
+
           console.log('Manual job recommendations received:', manualRecommendations);
         } catch (error) {
           console.error('Failed to get job recommendations for manual skills:', error);
@@ -120,7 +120,7 @@ function CareerInsights() {
           setIsGettingManualRecommendations(false);
         }
       }
-      
+
       console.log('Onboarding completed!', {
         disabilities: selectedDisabilities,
         skillsSource: selectedResume && extractedText ? 'resume' : 'manual',
@@ -180,14 +180,14 @@ function CareerInsights() {
               Career Insights
             </span>
           </li>
-                      <li>
-              <button 
-                onClick={handleMatchesRoadmaps}
-                className="text-[#767676] hover:text-[#2D6A4F] transition-colors cursor-pointer"
-              >
-                Matches & Roadmaps
-              </button>
-            </li>
+          <li>
+            <button
+              onClick={handleMatchesRoadmaps}
+              className="text-[#767676] hover:text-[#2D6A4F] transition-colors cursor-pointer"
+            >
+              Matches & Roadmaps
+            </button>
+          </li>
         </ul>
         <div className="flex items-center space-x-4">
           {isAuthenticated && (
@@ -200,12 +200,12 @@ function CareerInsights() {
                 aria-haspopup="true"
               >
                 {/* User Avatar */}
-                <img 
-                  src="https://avatar.iran.liara.run/public" 
+                <img
+                  src="https://avatar.iran.liara.run/public"
                   alt="User Avatar"
                   className="w-8 h-8 rounded-full"
                 />
-                
+
                 {/* User Info */}
                 <div className="flex flex-col items-start">
                   <span className="text-sm font-medium text-gray-900">
@@ -213,7 +213,7 @@ function CareerInsights() {
                   </span>
                   <span className="text-xs text-gray-500">Internet Identity</span>
                 </div>
-                
+
                 {/* Dropdown Arrow */}
                 <motion.svg
                   className="w-4 h-4 text-gray-500"
@@ -258,7 +258,7 @@ function CareerInsights() {
 
       <div className="px-20 py-8 pt-28">
         <div className="relative flex justify-between items-start max-w-[1280px] mx-auto">
-          <div  className="absolute top-3 h-0.5 bg-[#eaf1ee] left-[33%] right-[45%] sm:left-[31%] sm:right-[32%] md:left-[3%] md:right-[10%]"></div>
+          <div className="absolute top-3 h-0.5 bg-[#eaf1ee] left-[33%] right-[45%] sm:left-[31%] sm:right-[32%] md:left-[3%] md:right-[10%]"></div>
 
           {/* Step Indicators */}
           <div className="flex flex-col bg-white px-4 pl-10 md:pl-0">
@@ -298,17 +298,17 @@ function CareerInsights() {
                     {selectedDisabilities.map((disability, index) => (
                       <div
                         key={index}
-                        className="flex items-center bg-emerald-700 text-white text-sm px-3 py-1 rounded-full"
+                        className="flex items-center bg-[#2d6a4f] text-[#FFFFFF] text-sm px-3 py-2 rounded-lg font-medium"
                       >
-                        <span>{disability}</span>
                         <button
-                          className="ml-2 text-white hover:text-gray-200"
+                          className="mr-2 text-[#FFFFFF] hover:text-gray-200 flex items-center justify-center w-4 h-4"
                           onClick={() =>
                             setSelectedDisabilities(selectedDisabilities.filter((item) => item !== disability))
                           }
                         >
                           ×
                         </button>
+                        <span>{disability}</span>
                       </div>
                     ))}
                   </div>
@@ -376,11 +376,10 @@ function CareerInsights() {
                         value={skillsText}
                         onChange={(e) => setSkillsText(e.target.value)}
                         placeholder="Describe your skills, experience, and expertise. For example: 'I have 3 years of experience in React and JavaScript development, proficient in UI/UX design, familiar with Node.js and MongoDB...'"
-                        className={`w-full p-4 border border-gray-300 rounded-lg resize-none transition-colors focus:ring-2 focus:ring-emerald-600 focus:border-transparent ${
-                          selectedResume && extractedText 
-                            ? 'bg-gray-50 text-gray-500' 
-                            : 'bg-white text-gray-900'
-                        }`}
+                        className={`w-full p-4 border border-gray-300 rounded-lg resize-none transition-colors focus:ring-2 focus:ring-emerald-600 focus:border-transparent ${selectedResume && extractedText
+                          ? 'bg-gray-50 text-gray-500'
+                          : 'bg-white text-gray-900'
+                          }`}
                         rows={6}
                         disabled={selectedResume && extractedText}
                       />
@@ -413,23 +412,24 @@ function CareerInsights() {
               </>
             )}
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-end gap-3 mt-6">
               {step > 1 && (
                 <button
                   onClick={handleBack}
-                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition"
+                  className="px-6 py-2 rounded-lg font-medium border border-[#2C6A4F] bg-white text-[#2C6A4F] hover:bg-gray-50 transition-all duration-200"
                 >
-                  Back
+                  Previous
                 </button>
               )}
               <button
                 onClick={handleNext}
-                disabled={isGettingManualRecommendations}
-                className={`px-5 py-2 rounded-md shadow transition ${
-                  isGettingManualRecommendations 
-                    ? 'text-[13px] md:text-[15px] bg-gray-400 text-white cursor-not-allowed' 
-                    : 'text-[13px] md:text-[15px] bg-emerald-800 text-white hover:bg-emerald-700'
-                }`}
+                disabled={isGettingManualRecommendations || (step === 1 && selectedDisabilities.length === 0)}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isGettingManualRecommendations
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : step === 1 && selectedDisabilities.length === 0
+                    ? 'bg-[#EAEAEA] text-[#777777] cursor-not-allowed'
+                    : 'bg-[#2c6a4f] text-[#FFFFFF] hover:bg-[#245a43] shadow-sm'
+                  }`}
               >
                 {isGettingManualRecommendations ? (
                   <span className="flex items-center">
@@ -440,15 +440,13 @@ function CareerInsights() {
                     Getting Job Recommendations...
                   </span>
                 ) : (
-                  step === 2 ? 'Complete Setup' : 'Next'
+                  step === 2 ? 'Save and Continue' : 'Save and Continue'
                 )}
               </button>
             </div>
           </div>
         </div>
       </div>
-
-
 
       <div className="border-t border-gray-300 mt-16 px-4 sm:px-8 md:px-20 py-6">
         <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
