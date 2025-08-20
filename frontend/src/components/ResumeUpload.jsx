@@ -30,7 +30,10 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragActive(false);
+    // Only set dragActive to false if we're leaving the drop zone entirely
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragActive(false);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -240,7 +243,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            onClick={!selectedFile ? handleBrowseFiles : undefined}
+            onClick={handleBrowseFiles}
           >
             {/* Hidden file input */}
             <input
@@ -384,7 +387,9 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
                 <img src="/src/assets/PDF Logo.png" alt="PDF" className="w-10 h-10" />
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">User-Resume.pdf</h4>
+                <h4 className="font-medium text-gray-900 truncate max-w-[300px]" title={selectedFile.name}>
+                  {selectedFile.name.length > 50 ? selectedFile.name.substring(0, 50) + '...' : selectedFile.name}
+                </h4>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span>{(selectedFile.size / 1024).toFixed(0)} KB</span>
                   <span>•</span>

@@ -423,10 +423,10 @@ function CareerInsights() {
               )}
               <button
                 onClick={handleNext}
-                disabled={isGettingManualRecommendations || (step === 1 && selectedDisabilities.length === 0)}
+                disabled={isGettingManualRecommendations || (step === 1 && selectedDisabilities.length === 0) || (step === 2 && !skillsText.trim() && !selectedResume)}
                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isGettingManualRecommendations
                   ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : step === 1 && selectedDisabilities.length === 0
+                  : (step === 1 && selectedDisabilities.length === 0) || (step === 2 && !skillsText.trim() && !selectedResume)
                     ? 'bg-[#EAEAEA] text-[#777777] cursor-not-allowed'
                     : 'bg-[#2c6a4f] text-[#FFFFFF] hover:bg-[#245a43] shadow-sm'
                   }`}
