@@ -6,8 +6,8 @@ const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const llm = new ChatGoogleGenerativeAI({
   model: "gemini-1.5-flash",
   apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY,
-  temperature: 0.7,
-  maxOutputTokens: 2048,
+  temperature: 0.1, // Lower temperature for more consistent JSON output
+  maxOutputTokens: 3000, // Increased for disability guidance
 });
 
 console.log("[LLM] Using Google Gemini API");
@@ -26,50 +26,7 @@ function loadPrompt(filename, vars = {}) {
   return prompt;
 }
 
-// Simple function untuk generate accessibility guidance terpisah
-async function generateAccessibilityGuidance(jobTitle, disabilities) {
-  if (!disabilities || disabilities.length === 0) {
-    return null;
-  }
 
-  const cacheKey = `accessibility_${jobTitle}_${disabilities}`;
-  
-  if (accessibilityCache.has(cacheKey)) {
-    console.log("[Accessibility] Using cached guidance");
-    return accessibilityCache.get(cacheKey);
-  }
-
-  try {
-    console.log("[Accessibility] Generating guidance for:", jobTitle, "with disabilities:", disabilities);
-    
-    const simplePrompt = `Create detailed accessibility guidance for someone with ${disabilities} who wants to work as a ${jobTitle}.
-
-Please provide practical, actionable advice covering:
-
-1. **Workplace Accommodations**: Specific accommodations needed for this role
-2. **Assistive Technologies**: Tools and software that can help
-3. **Skill Development**: How to adapt learning and skill development
-4. **Career Advancement**: Tips for professional growth and networking
-5. **Industry Considerations**: Specific considerations for this field
-
-Write in a supportive, empowering tone using markdown formatting. Focus on abilities and solutions, not limitations.
-
-Generate the guidance now:`;
-
-    const response = await llm.invoke(simplePrompt);
-    const guidance = response.content.trim();
-    
-    console.log("[Accessibility] Generated guidance successfully");
-    
-    // Cache the result
-    accessibilityCache.set(cacheKey, guidance);
-    
-    return guidance;
-  } catch (error) {
-    console.error("[Accessibility] Error generating guidance:", error);
-    return "Accessibility guidance could not be generated at this time. Please try refreshing the page or contact support if the issue persists.";
-  }
-}
 
 async function generateCompleteRoadmap(prompt, cacheKey) {
   // Check cache first
@@ -88,7 +45,7 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
   const requestPromise = (async () => {
     try {
       console.log("[LLM] Making API request...");
-      
+
       const response = await llm.invoke(prompt);
       const text = response.content.trim();
 
@@ -99,6 +56,12 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
 
       // Remove markdown code blocks (```json and ```)
       jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*$/g, '');
+
+      // If response contains markdown headers, it's not following JSON format
+      if (jsonText.includes('##') || jsonText.includes('**') || jsonText.includes('###')) {
+        console.error("[Gemini] Response is markdown instead of JSON, forcing fallback");
+        throw new Error("LLM returned markdown instead of JSON");
+      }
 
       // Try to find JSON object in the response
       const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
@@ -114,31 +77,55 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
         const parsed = JSON.parse(jsonText);
         if (parsed && typeof parsed === 'object' && parsed.basic && parsed.intermediate && parsed.advanced) {
           console.log("[Gemini] Successfully parsed complete roadmap");
-          // Cache the result
-          roadmapCache.set(cacheKey, parsed);
-          return parsed;
+          // Ensure arrays are properly formatted
+          if (Array.isArray(parsed.basic) && Array.isArray(parsed.intermediate) && Array.isArray(parsed.advanced)) {
+            // If disabilityGuidance exists, ensure it's also an array
+            if (parsed.disabilityGuidance && !Array.isArray(parsed.disabilityGuidance)) {
+              console.warn("[Gemini] disabilityGuidance is not an array, converting...");
+              parsed.disabilityGuidance = [];
+            }
+            // Cache the result
+            roadmapCache.set(cacheKey, parsed);
+            return parsed;
+          } else {
+            throw new Error("Skills sections are not arrays");
+          }
         } else {
-          throw new Error("Invalid roadmap structure");
+          throw new Error("Invalid roadmap structure - missing required sections");
         }
       } catch (e) {
         console.error("[Gemini] JSON parsing failed:", e.message);
         console.error("[Gemini] Attempted to parse:", jsonText.slice(0, 500));
 
+        // Check if response contains markdown instead of JSON
+        if (jsonText.includes('##') || jsonText.includes('**') || jsonText.includes('###')) {
+          console.error("[Gemini] Response appears to be markdown instead of JSON");
+        }
+
         // Return a fallback roadmap structure
         const fallback = {
           basic: [{
             title: "Basic Skills",
-            description: "Unable to parse roadmap from LLM response. Please try again."
+            description: "Unable to parse roadmap from LLM response. Please regenerate the roadmap."
           }],
           intermediate: [{
             title: "Intermediate Skills",
-            description: "Unable to parse roadmap from LLM response. Please try again."
+            description: "Unable to parse roadmap from LLM response. Please regenerate the roadmap."
           }],
           advanced: [{
             title: "Advanced Skills",
-            description: "Unable to parse roadmap from LLM response. Please try again."
+            description: "Unable to parse roadmap from LLM response. Please regenerate the roadmap."
           }]
         };
+
+        // Add disability guidance fallback if needed
+        if (cacheKey.includes('_')) { // Has disabilities in cache key
+          fallback.disabilityGuidance = [{
+            title: "Accessibility Guidance",
+            description: "LLM failed to generate proper accessibility guidance. Please try regenerating the roadmap."
+          }];
+        }
+
         roadmapCache.set(cacheKey, fallback);
         return fallback;
       }
@@ -165,66 +152,49 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
 async function generateRoadmap(jobTitle, disabilities = null) {
   console.log(`[Roadmap Generator] Starting roadmap generation for: ${jobTitle}`, disabilities ? `with disabilities: ${disabilities}` : '');
 
-  // Create cache key for main roadmap (without disabilities)
-  const cacheKey = `roadmap_${jobTitle.toLowerCase().replace(/\s+/g, '_')}`;
-  
+  // Create cache key including disabilities for proper caching
+  const cacheKey = `roadmap_${jobTitle.toLowerCase().replace(/\s+/g, '_')}${disabilities ? `_${disabilities.replace(/\s+/g, '_')}` : ''}`;
+
   if (roadmapCache.has(cacheKey)) {
     console.log("[Roadmap Generator] Using cached roadmap for:", jobTitle);
-    const cachedRoadmap = roadmapCache.get(cacheKey);
-    
-    // If we have disabilities, generate accessibility guidance separately
-    if (disabilities && disabilities.length > 0) {
-      console.log("[Roadmap Generator] Adding accessibility guidance...");
-      const accessibilityGuidance = await generateAccessibilityGuidance(jobTitle, disabilities);
-      return {
-        ...cachedRoadmap,
-        disabilityGuidance: accessibilityGuidance
-      };
-    }
-    
-    return cachedRoadmap;
+    return roadmapCache.get(cacheKey);
   }
 
-  // Generate main roadmap without disabilities
-  console.log("[Roadmap Generator] Generating main roadmap...");
+  // Generate complete roadmap including disabilities if present
+  console.log("[Roadmap Generator] Generating complete roadmap...");
 
-  const mainPrompt = `Generate a complete learning roadmap for "${jobTitle}" position.
+  const hasDisabilities = disabilities && disabilities.length > 0;
 
-Please provide a comprehensive roadmap with three skill levels: Basic, Intermediate, and Advanced.
+  const mainPrompt = `JSON ONLY. No markdown. No explanations. No text outside JSON. No emojis.
 
-Return the response as a JSON object with this exact structure:
+Generate roadmap for ${jobTitle}${hasDisabilities ? ` with accessibility guidance for ${disabilities}` : ''}.
+
 {
   "basic": [
-    {"title": "Skill Name", "description": "Detailed description of what to learn and why it's important"}
+    {"title": "Skill Name", "description": "Brief description (max 5 sentences)"}
   ],
   "intermediate": [
-    {"title": "Skill Name", "description": "Detailed description of what to learn and why it's important"}
+    {"title": "Skill Name", "description": "Brief description (max 5 sentences)"}
   ],
   "advanced": [
-    {"title": "Skill Name", "description": "Detailed description of what to learn and why it's important"}
-  ]
+    {"title": "Skill Name", "description": "Brief description (max 5 sentences)"}
+  ]${hasDisabilities ? `,
+  "disabilityGuidance": [
+    {"title": "Workplace Accommodations", "description": "Detailed explanation of specific tools, workplace modifications, and environmental adjustments for ${disabilities} in ${jobTitle} role. Include concrete examples and implementation strategies."},
+    {"title": "Technology Recommendations", "description": "Comprehensive list of assistive technologies, software, hardware, and digital tools that enhance productivity for ${disabilities} in ${jobTitle}."},
+    {"title": "Skill Adaptation Strategies", "description": "Detailed methods for adapting learning paths and skill development processes for ${disabilities}. Include alternative learning approaches and techniques."},
+    {"title": "Career Advancement Tips", "description": "Specific strategies for professional growth, networking, self-advocacy, and building successful career while managing ${disabilities}."},
+    {"title": "Industry Considerations", "description": "Unique challenges, opportunities, and best practices specific to ${jobTitle} field for individuals with ${disabilities}. Include companies known for inclusive practices."},
+    {"title": "Communication Strategies", "description": "Effective workplace communication methods and protocols for ${disabilities}. Include tools and techniques for clear professional interaction."},
+    {"title": "Community & Resources", "description": "Professional organizations, support networks, mentorship programs, and communities specifically for people with ${disabilities} in ${jobTitle} field."}
+  ]` : ''}
 }
 
-Guidelines:
-- Basic: 5-7 fundamental skills every beginner should master first
-- Intermediate: 5-7 skills to build upon the basics, more specialized knowledge
-- Advanced: 5-7 expert-level skills for senior positions and specialization
-- Each description should be practical and actionable
-- Focus on skills most relevant to ${jobTitle} role
-- Include both technical and soft skills where appropriate
-
-Generate the complete roadmap now:`;
+Return valid JSON only:`;
 
   console.log("[Roadmap Generator] Main prompt:", mainPrompt);
 
   const result = await generateCompleteRoadmap(mainPrompt, cacheKey);
-  
-  // If we have disabilities, add accessibility guidance
-  if (disabilities && disabilities.length > 0) {
-    console.log("[Roadmap Generator] Adding accessibility guidance...");
-    const accessibilityGuidance = await generateAccessibilityGuidance(jobTitle, disabilities);
-    result.disabilityGuidance = accessibilityGuidance;
-  }
 
   console.log("[Roadmap Generator] Complete roadmap generated successfully");
   return result;

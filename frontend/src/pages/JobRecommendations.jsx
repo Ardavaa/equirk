@@ -363,8 +363,9 @@ function JobRecommendations() {
                       { key: 'advanced', label: 'Advanced', description: 'Master advanced concepts and build professional expertise.' },
                       ...((currentData.disabilities || disabilities).length > 0 ? [{ key: 'disability', label: 'Accessibility & Inclusion', description: 'Specialized guidance for working in this field with your specific disability considerations and accommodations.' }] : [])
                     ].map((section) => {
-                      // Handle disability section differently
+                      // Handle disability section the same as other sections
                       if (section.key === 'disability') {
+                        const skills = Array.isArray(roadmap.disabilityGuidance) ? roadmap.disabilityGuidance : [];
                         return (
                           <div key={section.key} className="flex gap-16 items-start">
                             <div className="w-1/3 flex-shrink-0">
@@ -373,13 +374,31 @@ function JobRecommendations() {
                             </div>
                             
                             <div className="flex-1">
-                              {roadmap && roadmap.disabilityGuidance ? (
-                                <div className="prose prose-gray max-w-none">
-                                  <MarkdownErrorBoundary fallbackContent={String(roadmap.disabilityGuidance)}>
-                                    <ReactMarkdown className="markdown-content">
-                                      {String(roadmap.disabilityGuidance)}
-                                    </ReactMarkdown>
-                                  </MarkdownErrorBoundary>
+                              {skills.length > 0 ? (
+                                <div className="flex flex-col gap-3">
+                                  {skills.map((skill, idx) => (
+                                    <div key={skill.title || idx}>
+                                      <button
+                                        className={`w-full flex items-center text-left px-0 py-4 border-b border-gray-100 focus:outline-none transition group ${openIndexes[section.key] === idx ? 'bg-gray-50' : ''}`}
+                                        onClick={() => handleAccordion(section.key, idx)}
+                                      >
+                                        <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#eaf1ee] text-emerald-800 font-bold text-lg mr-5 border border-[#eaf1ee]">
+                                          {String(idx + 1).padStart(2, '0')}
+                                        </span>
+                                        <span className="text-lg font-medium text-[#252525]">{skill.title}</span>
+                                        <span className={`ml-auto transition-transform ${openIndexes[section.key] === idx ? 'rotate-180' : ''}`}>
+                                          <svg width="20" height="20" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                                        </span>
+                                      </button>
+                                      {openIndexes[section.key] === idx && (
+                                        <div className="pl-16 pb-4">
+                                          {skill.description && (
+                                            <p className="text-[#888] text-base mb-2">{skill.description}</p>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
                               ) : (
                                 <div className="text-gray-500">No specific accessibility guidance available for this job role.</div>

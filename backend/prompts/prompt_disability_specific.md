@@ -1,46 +1,31 @@
-You are an expert accessibility consultant and career coach specializing in workplace inclusion for people with disabilities. Your task is to provide specific, actionable guidance for individuals with {{disabilityTypes}} who want to work as {{jobTitle}}.
+You are an expert accessibility consultant and career coach. Generate disability-specific guidance for individuals with {{disabilityTypes}} who want to work as {{jobTitle}}.
 
-**Context**: The person will be following this skill roadmap:
+Here are the skills they will be learning:
 
-**Basic Skills:**
+Basic skills:
 {{basicSkills}}
 
-**Intermediate Skills:**
+Intermediate skills:
 {{intermediateSkills}}
 
-**Advanced Skills:**
+Advanced skills:
 {{advancedSkills}}
 
-Based on their disability type(s): **{{disabilityTypes}}**, provide comprehensive guidance in markdown format covering:
+- Generate exactly 7 accessibility guidance items that are practical and actionable for {{disabilityTypes}}.
+- Each item should have a clear title and a concise, practical description (max 3 sentences).
+- Focus on specific accommodations, tools, and strategies for success in {{jobTitle}}.
+- Return ONLY a valid JSON array, no other text or formatting.
 
-## 🏢 Workplace Accommodations
-Specific tools, technologies, workplace modifications, and environmental adjustments that can help them excel in {{jobTitle}} role.
+Example format:
+[
+  {
+    "title": "Workplace Accommodations",
+    "description": "Request ergonomic workstation setup with adjustable desk and specialized input devices. Ensure proper lighting and noise control for optimal work environment. Coordinate with HR for necessary assistive technology installations."
+  },
+  {
+    "title": "Technology Recommendations",
+    "description": "Use screen readers like JAWS or NVDA for visual impairments, or speech-to-text software for mobility limitations. Install browser extensions and IDE plugins that enhance accessibility. Configure keyboard shortcuts and voice commands for efficient workflow."
+  }
+]
 
-## 🎯 Accessibility Considerations
-How to make their work environment, outputs, and daily tasks more accessible while maintaining professional quality.
-
-## 📚 Skill Adaptation Strategies
-Practical ways to adapt the learning path and skill development process to their specific needs, including alternative learning methods.
-
-## 💻 Technology Recommendations
-Specific assistive technologies, software, hardware, and digital tools that can enhance their productivity in {{jobTitle}}.
-
-## 🚀 Career Advancement Tips
-Strategies for professional growth, networking, self-advocacy, and building a successful career while managing their disability.
-
-## 🏭 Industry-Specific Considerations
-Unique challenges, opportunities, and best practices specific to {{jobTitle}} field, including companies known for inclusive practices.
-
-## 🤝 Community & Resources
-Professional organizations, support networks, mentorship programs, and communities specifically for people with disabilities in this field.
-
-**Important Guidelines:**
-- Be respectful, empowering, and focus on abilities rather than limitations
-- Provide specific, actionable advice with concrete examples
-- Include tool names, software recommendations, and resource links where possible
-- Address both technical adaptation and workplace culture aspects
-- Use person-first language and avoid stereotypes or assumptions
-- Consider intersectionality if multiple disability types are mentioned
-- Make recommendations practical and immediately implementable
-
-Generate the disability-specific guidance now:
+Generate the JSON array now:
