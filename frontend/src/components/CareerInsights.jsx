@@ -17,6 +17,7 @@ function CareerInsights() {
   const [jobRecommendations, setJobRecommendations] = useState([]);
   const [isGettingManualRecommendations, setIsGettingManualRecommendations] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const dropdownRef = useRef(null);
 
@@ -51,6 +52,17 @@ function CareerInsights() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Track scroll position for navbar shadow effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
 
@@ -172,60 +184,75 @@ function CareerInsights() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
-        <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
-        <ul className="hidden md:flex space-x-8 font-normal text-lg">
-          <li>
-            <span className="text-[#2D6A4F] transition-colors cursor-pointer">
-              Career Insights
-            </span>
-          </li>
-          <li>
-            <button
-              onClick={handleMatchesRoadmaps}
-              className="text-[#767676] hover:text-[#2D6A4F] transition-colors cursor-pointer"
-            >
-              Matches & Roadmaps
-            </button>
-          </li>
-        </ul>
-        <div className="flex items-center space-x-4">
-          {isAuthenticated && (
-            <div className="relative" ref={dropdownRef}>
-              {/* User Dropdown Button */}
-              <motion.button
-                onClick={handleUserDropdownToggle}
-                className="flex items-center space-x-3 bg-transparent rounded-lg px-3 py-2 focus:outline-none"
-                aria-expanded={isUserDropdownOpen}
-                aria-haspopup="true"
-              >
-                {/* User Avatar */}
-                <img
-                  src="https://avatar.iran.liara.run/public"
-                  alt="User Avatar"
-                  className="w-8 h-8 rounded-full"
-                />
-
-                {/* User Info */}
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium text-gray-900">
-                    {truncatePrincipal(principal)}
+      {/* Clean Navbar */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-gray-200 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/95 backdrop-blur-md shadow-lg' 
+          : 'bg-white shadow-sm'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <img src={Logo} alt="logo" className="h-8 w-auto" />
+            </div>
+            
+            {/* Center Navigation */}
+            <div className="hidden md:block">
+              <div className="flex space-x-8">
+                <div className="relative flex items-center h-20">
+                  <span className="text-[#2D6A4F] font-medium text-lg cursor-pointer">
+                    Career Insights
                   </span>
-                  <span className="text-xs text-gray-500">Internet Identity</span>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D6A4F]"></div>
                 </div>
-
-                {/* Dropdown Arrow */}
-                <motion.svg
-                  className="w-4 h-4 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  animate={{ rotate: isUserDropdownOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
+                <button
+                  onClick={handleMatchesRoadmaps}
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </motion.svg>
-              </motion.button>
+                  Matches & Roadmaps
+                </button>
+              </div>
+            </div>
+            
+            {/* User Profile */}
+            <div className="flex items-center space-x-4">
+              {isAuthenticated && (
+                <div className="relative" ref={dropdownRef}>
+                  {/* User Dropdown Button */}
+                  <motion.button
+                    onClick={handleUserDropdownToggle}
+                    className="flex items-center space-x-3 bg-transparent rounded-lg px-3 py-2 focus:outline-none"
+                    aria-expanded={isUserDropdownOpen}
+                    aria-haspopup="true"
+                  >
+                    {/* User Avatar */}
+                    <img
+                      src="https://avatar.iran.liara.run/public"
+                      alt="User Avatar"
+                      className="w-8 h-8 rounded-full"
+                    />
+
+                    {/* User Info */}
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-gray-900">
+                        {truncatePrincipal(principal)}
+                      </span>
+                      <span className="text-xs text-gray-500">Internet Identity</span>
+                    </div>
+
+                    {/* Dropdown Arrow */}
+                    <motion.svg
+                      className="w-4 h-4 text-gray-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      animate={{ rotate: isUserDropdownOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </motion.svg>
+                  </motion.button>
 
               {/* Dropdown Menu */}
               <AnimatePresence>
@@ -251,8 +278,10 @@ function CareerInsights() {
                   </motion.div>
                 )}
               </AnimatePresence>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </nav>
 

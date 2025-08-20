@@ -85,55 +85,65 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-gray-200 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg' 
-          : 'bg-white shadow-sm'
-      }`}>
+      <motion.nav 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled 
+            ? 'bg-white/95 backdrop-blur-md shadow-lg' 
+            : 'bg-white shadow-sm'
+        } border-b border-gray-200`}
+        initial={{ y: prefersReducedMotion ? 0 : -100 }}
+        animate={{ y: 0 }}
+        transition={getAccessibleTransition(prefersReducedMotion, {
+          type: "spring", 
+          stiffness: 100, 
+          damping: 20,
+          duration: 0.6
+        })}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
               <img src={Logo} alt="logo" className="h-8 w-auto" />
             </div>
-            
-            {/* Center Navigation */}
+
+            {/* Desktop Navigation */}
             <div className="hidden md:block">
               <div className="flex space-x-8">
                 <button 
                   onClick={() => handleNavClick('hero')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Home
                 </button>
                 <button 
                   onClick={() => handleNavClick('about')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   About
                 </button>
                 <button 
                   onClick={() => handleNavClick('features')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Features
                 </button>
                 <button 
                   onClick={() => handleNavClick('career')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Career
                 </button>
                 <button 
                   onClick={() => handleNavClick('contact')}
-                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                  className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors duration-200"
                 >
                   Contact
                 </button>
               </div>
             </div>
-            
-            {/* Right Side - Mobile Menu Toggle + Auth */}
+
+            {/* User Profile / Auth Section */}
             <div className="flex items-center space-x-4">
               {/* Mobile Menu Toggle */}
               <motion.button
@@ -249,7 +259,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Mobile Menu */}
       <AnimatePresence>

@@ -42,6 +42,7 @@ function JobRecommendations() {
   const { logout, principal, isLoading } = useAuth();
   const { jobRecommendationsData, saveJobRecommendationsData, hasJobRecommendationsData } = useJobRecommendations();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const dropdownRef = useRef(null);
   
@@ -99,6 +100,17 @@ function JobRecommendations() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Track scroll position for navbar shadow effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleBackToCareerInsights = () => {
@@ -187,29 +199,43 @@ function JobRecommendations() {
   };
 
   return (
-         <div className="min-h-screen bg-white">
-       {/* Navigation - Fixed like landing page */}
-       <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center py-6 shadow-sm bg-white px-10 border-gray-200 border-1 border-solid">
-         <img src={Logo} alt="logo" className="w-[30%] md:w-[10%] h-auto" />
-                 <ul className="hidden md:flex space-x-8 font-normal text-lg">
-          <li>
-            <button 
-              onClick={handleBackToCareerInsights}
-              className="text-[#2D6A4F] transition-colors cursor-pointer"
-            >
-              Career Insights
-            </button>
-          </li>
-          <li>
-            <button 
-              onClick={handleMatchesRoadmaps}
-              className="text-[#767676] hover:text-[#2D6A4F] transition-colors cursor-pointer"
-            >
-              Matches & Roadmaps
-            </button>
-          </li>
-         </ul>
-        <div className="flex items-center space-x-4">
+       <div className="min-h-screen bg-white">
+       {/* Clean Navbar */}
+       <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-gray-200 transition-all duration-300 ${
+         isScrolled 
+           ? 'bg-white/95 backdrop-blur-md shadow-lg' 
+           : 'bg-white shadow-sm'
+       }`}>
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="flex justify-between items-center h-20">
+             {/* Logo */}
+             <div className="flex-shrink-0">
+               <img src={Logo} alt="logo" className="h-8 w-auto" />
+             </div>
+             
+             {/* Center Navigation */}
+             <div className="hidden md:block">
+               <div className="flex space-x-8">
+                 <button 
+                   onClick={handleBackToCareerInsights}
+                   className="text-gray-500 hover:text-[#2D6A4F] font-normal text-lg h-20 flex items-center transition-colors"
+                 >
+                   Career Insights
+                 </button>
+                 <div className="relative flex items-center h-20">
+                   <button 
+                     onClick={handleMatchesRoadmaps}
+                     className="text-[#2D6A4F] font-medium text-lg cursor-pointer"
+                   >
+                     Matches & Roadmaps
+                   </button>
+                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2D6A4F]"></div>
+                 </div>
+               </div>
+             </div>
+             
+             {/* User Profile */}
+             <div className="flex items-center space-x-4">
           <div className="relative" ref={dropdownRef}>
             {/* User Dropdown Button */}
             <motion.button
@@ -280,9 +306,11 @@ function JobRecommendations() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </div>
-      </nav>
+              </div>
+             </div>
+           </div>
+         </div>
+       </nav>
 
              {/* Main Content - Following Figma Design */}
        <div className="px-20 py-10 pt-28">
