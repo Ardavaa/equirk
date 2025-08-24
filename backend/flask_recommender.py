@@ -146,4 +146,4 @@ if __name__ == '__main__':
     print("📊 Endpoint: POST /recommend-jobs-batch")
     print("🔍 Health check: GET /health")
     print("📄 Using CSV: data/job-matching_data.csv")
-    app.run(debug=True, port=5000) 
+    app.run(debug=False, port=5000) 

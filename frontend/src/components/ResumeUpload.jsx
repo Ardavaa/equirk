@@ -59,7 +59,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
     const formData = new FormData();
     formData.append('pdf', file);
 
-    const response = await fetch('http://localhost:3001/api/extract-pdf-text', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/extract-pdf-text`, {
       method: 'POST',
       body: formData,
     });
@@ -70,11 +70,14 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
     }
 
     const result = await response.json();
-    return result.text;
+    return {
+      text: result.text,
+      fileData: result.fileData
+    };
   };
 
   const getJobRecommendations = async (cvText) => {
-    const response = await fetch('http://localhost:5000/recommend-jobs-batch', {
+    const response = await fetch(`${import.meta.env.VITE_ML_API_URL || 'http://localhost:5000'}/recommend-jobs-batch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,16 +118,15 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
       }, 200);
 
       // Extract text from PDF using backend API
-      const text = await extractTextFromBackend(file);
+      const result = await extractTextFromBackend(file);
+      const text = result.text;
+      const fileData = result.fileData;
       
       // Update progress
       clearInterval(progressInterval);
       setUploadProgress(80);
       setExtractedText(text);
       setIsExtracting(false);
-      
-      // Log the extracted text (as requested)
-      console.log('EXTRACTED TEXT:', text);
       
       // Get job recommendations
       setIsGettingRecommendations(true);
@@ -133,15 +135,15 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
       try {
         const recommendations = await getJobRecommendations(text);
         setJobRecommendations(recommendations);
-        console.log('JOB RECOMMENDATIONS:', recommendations);
         
         // Call callback to pass recommendations to parent
-        if (onJobRecommendations) onJobRecommendations(recommendations);
+        if (onJobRecommendations) onJobRecommendations(recommendations, fileData);
         
         setUploadProgress(100);
       } catch (recError) {
         console.warn('Failed to get job recommendations:', recError);
         // Continue without recommendations
+        if (onJobRecommendations) onJobRecommendations([], fileData);
         setUploadProgress(100);
       }
       
@@ -149,7 +151,7 @@ const ResumeUpload = ({ onFileSelect, onTextExtracted, onJobRecommendations, cla
       
       // Call callbacks
       if (onFileSelect) onFileSelect(file);
-      if (onTextExtracted) onTextExtracted(text);
+      if (onTextExtracted) onTextExtracted(text, fileData);
       
     } catch (error) {
       console.error('PDF processing error:', error);

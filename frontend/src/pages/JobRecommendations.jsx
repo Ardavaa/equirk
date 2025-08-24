@@ -6,6 +6,7 @@ import Logo from '../assets/Logo.png';
 import LogoutIcon from '../assets/Logout Button.png';
 import { useAuth } from '../contexts/AuthContext';
 import { useJobRecommendations } from '../contexts/JobRecommendationsContext';
+import { useSavedData } from '../contexts/SavedDataContext';
 import { useReducedMotion, getAccessibleTransition } from '../hooks/useReducedMotion';
 
 // Simple Error Boundary for ReactMarkdown
@@ -41,6 +42,7 @@ function JobRecommendations() {
   const navigate = useNavigate();
   const { logout, principal, isLoading } = useAuth();
   const { jobRecommendationsData, saveJobRecommendationsData, hasJobRecommendationsData } = useJobRecommendations();
+  const { saveRoadmap, isRoadmapSaved, updateRecentCareerMatches } = useSavedData();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -61,20 +63,58 @@ function JobRecommendations() {
     skills = [],
     resume = null,
     extractedText = '',
+    manualSkills = '',
+    skillsSource = '',
     jobRecommendations = []
   } = stateData;
 
   // Use context data if location state is empty but context has data
-  const currentData = (jobRecommendations.length > 0 || !hasJobRecommendationsData()) 
-    ? stateData 
-    : jobRecommendationsData;
+  const currentData = jobRecommendations.length > 0 ? stateData : (jobRecommendationsData || stateData);
 
   // Save data to context when new data comes from location state
   useEffect(() => {
+    
     if (jobRecommendations.length > 0) {
-      saveJobRecommendationsData(stateData);
+      // Check if this is new data by comparing with existing data
+      const existingData = jobRecommendationsData;
+      const isNewData = !existingData || 
+        JSON.stringify(existingData.jobRecommendations) !== JSON.stringify(jobRecommendations) ||
+        existingData.resume?.name !== resume?.name ||
+        existingData.extractedText !== extractedText ||
+        existingData.manualSkills !== manualSkills;
+      
+      if (isNewData) {
+        const dataToSave = {
+          jobRecommendations,
+          disabilities,
+          resume,
+          skills,
+          extractedText,
+          manualSkills,
+          skillsSource
+        };
+        saveJobRecommendationsData(dataToSave);
+        
+        // Update recent career matches for the matches-roadmaps page
+        // Send either resume OR skillsText, not both, to ensure proper conditional rendering
+        const additionalData = {
+          disabilities: disabilities
+        };
+        
+        if (resume && extractedText) {
+          // Resume was uploaded
+          additionalData.resume = resume;
+          additionalData.skillsText = null; // Explicitly clear skills text
+        } else if (manualSkills || (skillsSource === 'manual' && extractedText)) {
+          // Manual skills were entered
+          additionalData.skillsText = manualSkills || extractedText;
+          additionalData.resume = null; // Explicitly clear resume
+        }
+        
+        updateRecentCareerMatches(jobRecommendations, additionalData);
+      }
     }
-  }, [jobRecommendations, stateData, saveJobRecommendationsData]);
+  }, [jobRecommendations, resume, extractedText, disabilities]); // Depend on actual data
 
   const truncatePrincipal = (principal) => {
     if (!principal) return '';
@@ -134,7 +174,7 @@ function JobRecommendations() {
     setRoadmapLoading(true);
     setRoadmapError(null);
     
-    console.log('Fetching roadmap for:', job.title, 'with disabilities:', currentData.disabilities || disabilities);
+
     
     const params = new URLSearchParams({
       job: job.title,
@@ -143,12 +183,10 @@ function JobRecommendations() {
     
     try {
       const response = await fetch(`/api/roadmap?${params}`);
-      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log('Roadmap data received:', data);
       setRoadmap(data);
     } catch (error) {
       console.error('Fetch error:', error);
@@ -334,6 +372,30 @@ function JobRecommendations() {
                   <h1 className="text-4xl font-bold text-[#252525] mb-2">{selectedJobForRoadmap.title} Skill Roadmap</h1>
                   <p className="text-gray-600">Your personalized learning path to become a {selectedJobForRoadmap.title}</p>
                 </div>
+                
+                {/* Save Roadmap Button */}
+                {roadmap && !roadmapLoading && (
+                  <div className="flex items-center gap-3">
+                    {isRoadmapSaved(selectedJobForRoadmap.title) ? (
+                      <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="font-medium">Roadmap Saved</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => saveRoadmap(selectedJobForRoadmap.title, roadmap, selectedJobForRoadmap)}
+                        className="flex items-center gap-2 bg-[#2D6A4F] text-white px-6 py-3 rounded-lg hover:bg-[#22503B] transition-colors font-medium"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                        Save Roadmap
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               
               {/* Roadmap Content */}
@@ -506,44 +568,50 @@ function JobRecommendations() {
 
           {/* Job Cards */}
           {currentData.jobRecommendations && currentData.jobRecommendations.length > 0 ? (
-            <div className="flex flex-col gap-4">
+            <div className="space-y-4">
               {currentData.jobRecommendations.map((job, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white border border-[#EAEAEA] rounded-xl p-4 sm:p-6"
+                  className="bg-white border border-[#EAEAEA] rounded-lg p-6"
                 >
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    {/* Circular Logo with Monogram */}
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#81a595] to-[#377056] rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
-                      <span className="text-white font-bold text-lg">
+                  <div className="flex items-start gap-4">
+                    {/* Job Monogram */}
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-[#2C6A4F] font-bold text-lg">
                         {createMonogram(job.title)}
                       </span>
                     </div>
+                    
                     {/* Job Info */}
                     <div className="flex-1">
-                      <h3 className="text-lg sm:text-2xl font-semibold text-[#252525] mb-1 text-center sm:text-left">
+                      <h4 className="text-lg font-semibold text-[#252525] mb-1">
                         {job.title || 'Job Title Not Available'}
-                      </h3>
-                      <p className="text-gray-600 mb-4 text-center sm:text-left">
-                        Recommended Match #{index + 1}
-                      </p>
-                      {/* Job Description as Bullet Points */}
-                      <div className="space-y-3">
+                      </h4>
+                      
+                      {/* Disabilities info if available */}
+                      {(currentData.disabilities || []).length > 0 && (
+                        <p className="text-sm text-gray-600 mb-3">
+                          {(currentData.disabilities || []).join(' • ')} • Disabilities
+                        </p>
+                      )}
+                      
+                      {/* Job Description as bullet points */}
+                      <div className="space-y-1">
                         {job.description && (
-                          <div className="flex items-start gap-3">
-                            <span className="text-gray-400 text-sm mt-0.5 flex-shrink-0">•</span>
-                            <p className="text-[#777777] text-sm leading-relaxed flex-1">
+                          <div className="flex items-start gap-2">
+                            <span className="text-gray-400 text-sm mt-1 flex-shrink-0">•</span>
+                            <p className="text-gray-700 text-sm leading-relaxed">
                               {job.description}
                             </p>
                           </div>
                         )}
                         {job.skills_desc && (
-                          <div className="flex items-start gap-3">
-                            <span className="text-gray-400 text-sm mt-0.5 flex-shrink-0">•</span>
-                            <p className="text-[#777777] text-sm leading-relaxed flex-1">
+                          <div className="flex items-start gap-2">
+                            <span className="text-gray-400 text-sm mt-1 flex-shrink-0">•</span>
+                            <p className="text-gray-700 text-sm leading-relaxed">
                               {job.skills_desc}
                             </p>
                           </div>
@@ -551,10 +619,11 @@ function JobRecommendations() {
                       </div>
                     </div>
                   </div>
-                  {/* Bottom Section with Button */}
-                  <div className="border-t border-gray-200 pt-4 flex justify-center sm:justify-end">
+                  
+                  {/* Separator Line and Action Button */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
                     <button
-                      className="bg-emerald-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-md hover:bg-emerald-700 transition font-medium w-full sm:w-auto"
+                      className="bg-[#2D6A4F] text-white px-4 py-2 rounded-lg hover:bg-[#22503B] transition-colors font-medium text-sm"
                       onClick={() => handleViewRoadmap(job)}
                       disabled={roadmapLoading}
                     >
@@ -564,10 +633,10 @@ function JobRecommendations() {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          Loading Roadmap...
+                          Loading...
                         </span>
                       ) : (
-                        'View Skills Roadmap'
+                        'View skill roadmap'
                       )}
                     </button>
                   </div>

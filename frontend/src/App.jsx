@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import CareerSection from './components/CareerSection';
 import { AuthProvider } from './contexts/AuthContext';
 import { JobRecommendationsProvider } from './contexts/JobRecommendationsContext';
+import { SavedDataProvider } from './contexts/SavedDataContext';
 import AuthStatus from './components/AuthStatus';
 import CareerInsights from './components/CareerInsights';
 import JobRecommendations from './pages/JobRecommendations';
@@ -91,33 +92,43 @@ function MainLanding() {
   );
 }
 
+function AppRoutes() {
+  const location = useLocation();
+  
+  return (
+    <div className='bg-white'>
+      <Routes key={location.pathname}>
+        <Route path="/" element={<MainLanding />} />
+        <Route path="/career-insights" element={
+          <ProtectedRoute>
+            <CareerInsights />
+          </ProtectedRoute>
+        } />
+        <Route path="/job-recommendations" element={
+          <ProtectedRoute>
+            <JobRecommendations />
+          </ProtectedRoute>
+        } />
+        <Route path="/matches-roadmaps" element={
+          <ProtectedRoute>
+            <MatchesRoadmaps />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </div>
+  );
+}
+
 function App() {
   return (
     <div className='w-full h-full overflow-x-hidden'>
       <AuthProvider>
       <JobRecommendationsProvider>
+      <SavedDataProvider>
         <BrowserRouter>
-          <div className='bg-white'>
-            <Routes>
-              <Route path="/" element={<MainLanding />} />
-              <Route path="/career-insights" element={
-                <ProtectedRoute>
-                  <CareerInsights />
-                </ProtectedRoute>
-              } />
-              <Route path="/job-recommendations" element={
-                <ProtectedRoute>
-                  <JobRecommendations />
-                </ProtectedRoute>
-              } />
-              <Route path="/matches-roadmaps" element={
-                <ProtectedRoute>
-                  <MatchesRoadmaps />
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </div>
+          <AppRoutes />
         </BrowserRouter>
+      </SavedDataProvider>
       </JobRecommendationsProvider>
     </AuthProvider>
     </div>

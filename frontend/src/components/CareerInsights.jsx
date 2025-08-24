@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../assets/Logo.png';
 import LogoutIcon from '../assets/Logout Button.png';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useJobRecommendations } from '../contexts/JobRecommendationsContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ResumeUpload from './ResumeUpload';
 import { useReducedMotion, getAccessibleTransition } from '../hooks/useReducedMotion';
 
 function CareerInsights() {
   const { isAuthenticated, principal, logout, isLoading } = useAuth();
+  const { saveJobRecommendationsData } = useJobRecommendations();
+  const location = useLocation();
   const [step, setStep] = useState(1);
   const [selectedDisabilities, setSelectedDisabilities] = useState([]);
   const [skillsText, setSkillsText] = useState(''); // Changed to text input for skills
@@ -22,7 +25,7 @@ function CareerInsights() {
   const dropdownRef = useRef(null);
 
   const getJobRecommendationsFromManualSkills = async (skillsText) => {
-    const response = await fetch('http://localhost:5000/recommend-jobs-batch', {
+    const response = await fetch(`${import.meta.env.VITE_ML_API_URL || 'http://localhost:5000'}/recommend-jobs-batch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,6 +44,13 @@ function CareerInsights() {
     return data.recommendations || [];
   }; // New state for job recommendations
   const navigate = useNavigate();
+
+  // Scroll to top and reset state when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Reset to step 1 when navigating to this component
+    setStep(1);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -118,13 +128,10 @@ function CareerInsights() {
       if (!selectedResume && !extractedText && skillsText.trim()) {
         try {
           setIsGettingManualRecommendations(true);
-          console.log('Getting job recommendations for manual skills:', skillsText);
 
           const manualRecommendations = await getJobRecommendationsFromManualSkills(skillsText);
           finalJobRecommendations = manualRecommendations;
           setJobRecommendations(manualRecommendations);
-
-          console.log('Manual job recommendations received:', manualRecommendations);
         } catch (error) {
           console.error('Failed to get job recommendations for manual skills:', error);
           // Continue with empty recommendations on error
@@ -133,7 +140,8 @@ function CareerInsights() {
         }
       }
 
-      console.log('Onboarding completed!', {
+      // Save job recommendations data
+      saveJobRecommendationsData({
         disabilities: selectedDisabilities,
         skillsSource: selectedResume && extractedText ? 'resume' : 'manual',
         skillsData: finalSkillsData,
@@ -163,17 +171,25 @@ function CareerInsights() {
 
   const handleResumeSelect = (file) => {
     setSelectedResume(file);
-    console.log('Resume selected:', file);
   };
 
-  const handleTextExtracted = (text) => {
+  const handleTextExtracted = (text, fileData) => {
     setExtractedText(text);
-    console.log('Text extracted from PDF:', text);
+    
+    // Store file data for later use
+    if (fileData) {
+      setSelectedResume(prev => ({
+        ...prev,
+        fileContent: fileData.content,
+        originalname: fileData.originalname,
+        mimetype: fileData.mimetype,
+        size: fileData.size
+      }));
+    }
   };
 
-  const handleJobRecommendations = (recommendations) => {
+  const handleJobRecommendations = (recommendations, fileData) => {
     setJobRecommendations(recommendations);
-    console.log('Job recommendations received:', recommendations);
   };
 
   const handleBack = () => {

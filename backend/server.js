@@ -45,15 +45,22 @@ app.post('/api/extract-pdf-text', upload.single('pdf'), async (req, res) => {
       });
     }
 
-    console.log(`Processing PDF: ${req.file.originalname} (${req.file.size} bytes)`);
-
     // Extract text from PDF buffer
     const pdfData = await pdfParse(req.file.buffer);
     
-    // Return extracted text
+    // Convert buffer to base64 for storage
+    const fileContent = req.file.buffer.toString('base64');
+    
+    // Return extracted text and file content
     res.json({
       success: true,
       text: pdfData.text,
+      fileData: {
+        content: fileContent,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      },
       metadata: {
         filename: req.file.originalname,
         pages: pdfData.numpages,
@@ -93,14 +100,10 @@ app.use((error, req, res, next) => {
 // Roadmap generator endpoint
 app.get('/api/roadmap', async (req, res) => {
   const { job, disabilities } = req.query;
-  console.log('Roadmap request received for job:', job, 'with disabilities:', disabilities);
   if (!job) return res.status(400).json({ error: 'Missing job parameter' });
   
   try {
-    console.log('Generating roadmap...');
     const roadmap = await generateRoadmap(job, disabilities);
-    console.log('Roadmap generated:', roadmap);
-    console.log('DisabilityGuidance in roadmap:', roadmap.disabilityGuidance ? 'Present' : 'Not present');
     
     // Since generateRoadmap now returns arrays directly, just validate they exist and are arrays
     const safe = {
@@ -110,7 +113,6 @@ app.get('/api/roadmap', async (req, res) => {
       ...(roadmap.disabilityGuidance && { disabilityGuidance: roadmap.disabilityGuidance })
     };
     
-    console.log('Safe roadmap with disability guidance:', safe.disabilityGuidance ? 'Present' : 'Not present');
     res.json(safe);
   } catch (e) {
     console.error('Roadmap generation error:', e);
@@ -118,8 +120,77 @@ app.get('/api/roadmap', async (req, res) => {
   }
 });
 
+// In-memory storage for saved data (in production, use a database)
+let savedDataStore = {};
+
+// Endpoint to save user data (roadmaps, matches)
+app.post('/api/saved-data/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { savedRoadmaps, recentCareerMatches } = req.body;
+
+    if (!savedDataStore[userId]) {
+      savedDataStore[userId] = {};
+    }
+
+    if (savedRoadmaps) {
+      savedDataStore[userId].savedRoadmaps = savedRoadmaps;
+    }
+
+    if (recentCareerMatches) {
+      savedDataStore[userId].recentCareerMatches = recentCareerMatches;
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Data saved successfully',
+      data: savedDataStore[userId]
+    });
+  } catch (error) {
+    console.error('Error saving data:', error);
+    res.status(500).json({ error: 'Failed to save data' });
+  }
+});
+
+// Endpoint to retrieve user data
+app.get('/api/saved-data/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userData = savedDataStore[userId] || {
+      savedRoadmaps: [],
+      recentCareerMatches: []
+    };
+
+    res.json(userData);
+  } catch (error) {
+    console.error('Error retrieving data:', error);
+    res.status(500).json({ error: 'Failed to retrieve data' });
+  }
+});
+
+// Endpoint to delete specific saved roadmap
+app.delete('/api/saved-data/:userId/roadmap/:roadmapId', (req, res) => {
+  try {
+    const { userId, roadmapId } = req.params;
+    
+    if (savedDataStore[userId] && savedDataStore[userId].savedRoadmaps) {
+      savedDataStore[userId].savedRoadmaps = savedDataStore[userId].savedRoadmaps
+        .filter(roadmap => roadmap.id !== roadmapId);
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Roadmap deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Error deleting roadmap:', error);
+    res.status(500).json({ error: 'Failed to delete roadmap' });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   console.log(`📄 PDF extraction endpoint: POST /api/extract-pdf-text`);
+  console.log(`💾 Saved data endpoints: GET/POST /api/saved-data/:userId`);
 }); 

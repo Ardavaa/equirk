@@ -95,7 +95,6 @@ async function generateCompleteRoadmap(prompt, cacheKey) {
         }
       } catch (e) {
         console.error("[Gemini] JSON parsing failed:", e.message);
-        console.error("[Gemini] Attempted to parse:", jsonText.slice(0, 500));
 
         // Check if response contains markdown instead of JSON
         if (jsonText.includes('##') || jsonText.includes('**') || jsonText.includes('###')) {
